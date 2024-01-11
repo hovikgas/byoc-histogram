@@ -2,11 +2,12 @@
  * Creates a histogram based on a column of measures.
  * https://www.highcharts.com/docs/chart-and-series-types/histogram-series
  */
+import _ from "lodash";
 
 import Highcharts from "highcharts/es-modules/masters/highcharts.src";
 import "highcharts/es-modules/masters/modules/histogram-bellcurve.src";
 
-import { TableChartModel } from "./TableChartModel.ts";
+import {TableChartModel} from "./TableChartModel.ts";
 
 import {
     getChartContext,
@@ -63,8 +64,22 @@ const getQueriesFromChartConfig = (
     chartConfig: ChartConfig[]
 ): Array<Query> => {
     console.log(chartConfig);
-    const queries = Array<Query>()
-    return queries;
+    // map all the columns in the config to the query array
+    return chartConfig.map(
+        (config: ChartConfig): Query =>
+            _.reduce(
+                config.dimensions,
+                (acc: Query, dimension) => ({
+                    queryColumns: [
+                        ...acc.queryColumns,
+                        ...dimension.columns,
+                    ],
+                }),
+                {
+                    queryColumns: [],
+                } as Query,
+            ),
+    );
 }
 
 //const getDataModel = (chartModel: ChartModel) => {
