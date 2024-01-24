@@ -115,6 +115,7 @@ const renderChart = async (context: CustomChartContext): Promise<void> => {
 
     let data: number[] = tableModel.getDataForColumnName(measureName);
     if (data === undefined) {
+        console.log('setting data to []');
         data = [];  // make empty if no data.
     }
     console.log('data: ', data);
