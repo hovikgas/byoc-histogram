@@ -171,13 +171,13 @@ const init = async () => {
     console.log("init called");
 
     // Standard init with required properties.
-    const ctx = getChartContext({
+    const ctx = await getChartContext({
         getDefaultChartConfig: getDefaultChartConfig,
         getQueriesFromChartConfig: getQueriesFromChartConfig,
         renderChart: renderChart,
     });
-
-    console.log(`ctx: ${ctx}`);
+    console.log('rendering');
+    await renderChart(ctx);
 };
 
 init();
