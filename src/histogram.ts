@@ -105,8 +105,9 @@ const renderChart = async (context: CustomChartContext): Promise<void> => {
      */
 
     const chartModel = context.getChartModel()!;
-    console.log(chartModel);
+    console.log('Chart model: ', chartModel);
     const tableModel = new TableChartModel(chartModel);
+    console.log('tableModel: ', tableModel);
 
     // TODO Should this be abstracted more?
     const measureName = chartModel.config.chartConfig![0].dimensions[0].columns[0].name;
