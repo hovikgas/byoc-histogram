@@ -115,6 +115,7 @@ const renderChart = async (context: CustomChartContext): Promise<void> => {
 
     let data: number[] = tableModel.getDataForColumnName(measureName)
     console.log('data: ', data);
+    console.log(`data: ${data.toString()}`);
 
     Highcharts.chart('container', {
         title: {
