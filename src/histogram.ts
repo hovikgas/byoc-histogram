@@ -110,9 +110,10 @@ const renderChart = async (context: CustomChartContext): Promise<void> => {
 
     // TODO Should this be abstracted more?
     const measureName = chartModel.config.chartConfig![0].dimensions[0].columns[0].name;
-    console.log(`measure ${measureName}`);
+    console.log(`measure name: ${measureName}`);
 
     let data: number[] = tableModel.getDataForColumnName(measureName)
+    console.log('data: ', data);
 
     Highcharts.chart('container', {
         title: {
