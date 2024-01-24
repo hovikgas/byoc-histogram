@@ -19,13 +19,18 @@ import {
     DataType
 } from "@thoughtspot/ts-chart-sdk";
 
+
+const logmsg = (msg: string, data: any = "") => {
+    console.log(`Histogram: ${msg}`, data);
+}
+
 /**
  * Returns the default chart config for the histogram chart type.
  * @param chartModel A chart model (https://ts-chart-sdk-docs.vercel.app/interfaces/ChartModel.html)
  * @return An array of chart configs (https://ts-chart-sdk-docs.vercel.app/interfaces/ChartConfig.html)
  */
 const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
-    console.log("getting default chart config");
+    logmsg("getting default chart config");
 
     const tableModel = new TableChartModel(chartModel);
 
@@ -35,7 +40,7 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
     }
 
     const column_key = 'measure';
-    let configColumns: ChartColumn[] = [];
+    let configColumns: ChartColumn[];
 
     const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
     const dataColumns = tableModel.getColumnsWithDataTypes(numericTypes);
@@ -63,7 +68,7 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
 const getQueriesFromChartConfig = (
     chartConfig: ChartConfig[]
 ): Array<Query> => {
-    console.log(chartConfig);
+    logmsg('chart config: ', chartConfig);
     // map all the columns in the config to the query array
     return chartConfig.map(
         (config: ChartConfig): Query =>
@@ -86,8 +91,8 @@ const getQueriesFromChartConfig = (
 //}
 
 const renderChart = async (context: CustomChartContext): Promise<void> => {
-    console.log('render chart --------------------------------');
-    console.log(context);
+    logmsg('render chart --------------------------------');
+    logmsg('context: ', context);
 
     // Original code from https://jsfiddle.net/api/post/library/pure/
 
@@ -105,21 +110,21 @@ const renderChart = async (context: CustomChartContext): Promise<void> => {
      */
 
     const chartModel = context.getChartModel()!;
-    console.log('Chart model: ', chartModel);
+    logmsg('Chart model: ', chartModel);
     const tableModel = new TableChartModel(chartModel);
-    console.log('tableModel: ', tableModel);
+    logmsg('tableModel: ', tableModel);
 
     // TODO Should this be abstracted more?
     const measureName = chartModel.config.chartConfig![0].dimensions[0].columns[0].name;
-    console.log(`measure name: ${measureName}`);
+    logmsg(`measure name: ${measureName}`);
 
     let data: number[] = tableModel.getDataForColumnName(measureName);
-    console.log('checking data');
+    logmsg('checking data');
     if (data === undefined) {
-        console.log('setting data to []');
+        logmsg('setting data to []');
         data = [];  // make empty if no data.
     }
-    console.log('data: ', data);
+    logmsg('data: ', data);
 
     Highcharts.chart('container', {
         title: {
@@ -175,7 +180,7 @@ const renderChart = async (context: CustomChartContext): Promise<void> => {
 
 
 const init = async () => {
-    console.log("init called");
+    logmsg("init called");
 
     // Standard init with required properties.
     const ctx = await getChartContext({
@@ -183,7 +188,7 @@ const init = async () => {
         getQueriesFromChartConfig: getQueriesFromChartConfig,
         renderChart: renderChart,
     });
-    console.log('rendering');
+    logmsg('rendering');
     await renderChart(ctx);
 };
 
