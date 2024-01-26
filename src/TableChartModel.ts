@@ -55,6 +55,8 @@ export class TableChartModel {
     private _data: { [key: string]: any[] };  // Data for the columns, indexed by column name.
 
     constructor(protected chartModel: ChartModel) {
+        console.log("TableChartModel: chartModel === ", chartModel);
+
         this.chartModel = chartModel;
         this._columns = [];
         this._data = {};
@@ -67,8 +69,6 @@ export class TableChartModel {
      * @param chartModel The TS ChartModel object.
      */
     private _populate(chartModel: ChartModel) {
-        console.log("chartModel", chartModel);
-
         /*
          "columns": [
            {
@@ -85,6 +85,7 @@ export class TableChartModel {
         for (const c of chartModel.columns) {
             this._columns.push({columnName: c.name, columnId: c.id, columnType: c.type, dataType: c.dataType});
         }
+        console.log('TableChartModel: columns === ', this._columns);
 
         /*
            "data": [
@@ -110,6 +111,9 @@ export class TableChartModel {
            ],
            ... // but probably only one
         */
+
+        console.log('TableChartModel: chartModel.data === ', chartModel.data);
+
         if (chartModel.data && chartModel.data.length > 0) {
             // Only using the first data.  It's not clear what the other data items are for.
             const firstData = chartModel.data[0].data;
@@ -118,6 +122,8 @@ export class TableChartModel {
                 this._data[cname] = c.dataValue; // Probably OK to not copy.
             }
         }
+
+        console.log('TableChartModel: data === ', this._data);
     }
 
     /**
