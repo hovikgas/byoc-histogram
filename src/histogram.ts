@@ -73,7 +73,8 @@ const getQueriesFromChartConfig = (
     return chartConfig.map(
         (config: ChartConfig): Query =>
             _.reduce(
-                config.dimensions,
+                //config.dimensions,
+                config[0].dimensions,
                 (acc: Query, dimension) => ({
                     queryColumns: [
                         ...acc.queryColumns,
