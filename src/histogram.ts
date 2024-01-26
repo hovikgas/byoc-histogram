@@ -70,11 +70,10 @@ const getQueriesFromChartConfig = (
 ): Array<Query> => {
     logmsg('chart config: ', chartConfig);
     // map all the columns in the config to the query array
-    return chartConfig.map(
+    let queries = chartConfig.map(
         (config: ChartConfig): Query =>
             _.reduce(
-                //config.dimensions,
-                config[0].dimensions,
+                config.dimensions,
                 (acc: Query, dimension) => ({
                     queryColumns: [
                         ...acc.queryColumns,
@@ -86,6 +85,10 @@ const getQueriesFromChartConfig = (
                 } as Query,
             ),
     );
+
+    logmsg('queries: ', queries);
+
+    return queries;
 }
 
 //const getDataModel = (chartModel: ChartModel) => {
