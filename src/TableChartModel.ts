@@ -116,7 +116,10 @@ export class TableChartModel {
 
         if (chartModel.data && chartModel.data.length > 0) {
             // Only using the first data.  It's not clear what the other data items are for.
-            const firstData = chartModel.data[0].data;
+            const cmData = chartModel.data;
+            const firstQueryData = cmData[0];
+            const queryDataData = firstQueryData.data;
+            const firstData = queryDataData.dataValue[0];
             for (const c of firstData) { // each data array has an ID and dataValue array.
                 const cname = this.getColumnNameForId(c.columnId)!;
                 this._data[cname] = c.dataValue; // Probably OK to not copy.
