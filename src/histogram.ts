@@ -193,7 +193,7 @@ const init = async () => {
         renderChart: renderChart,
     });
     logmsg('rendering');
-    await renderChart(ctx);
+    renderChart(ctx);
 };
 
 init();
