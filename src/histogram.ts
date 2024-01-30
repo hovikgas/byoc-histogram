@@ -95,7 +95,7 @@ const getQueriesFromChartConfig = (
 //}
 
 const renderChart = async (context: CustomChartContext): Promise<void> => {
-    logmsg('render chart --------------------------------');
+    logmsg('render chart ================================');
     logmsg('context: ', context);
 
     // Original code from https://jsfiddle.net/api/post/library/pure/
