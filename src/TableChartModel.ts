@@ -119,7 +119,9 @@ export class TableChartModel {
             const cmData = chartModel.data;
             const firstQueryData = cmData[0];
             const queryDataData = firstQueryData.data;
+            console.log('query data data: ', queryDataData);
             const firstData = queryDataData.dataValue[0];
+            console.log('first data: ', firstData);
             for (const c of firstData) { // each data array has an ID and dataValue array.
                 const cname = this.getColumnNameForId(c.columnId)!;
                 this._data[cname] = c.dataValue; // Probably OK to not copy.
