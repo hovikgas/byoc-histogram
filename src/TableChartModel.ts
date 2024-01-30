@@ -62,6 +62,10 @@ export class TableChartModel {
         this._data = {};
 
         this._populate(chartModel);
+
+        console.log('TableChartMode ===========================================================');
+        console.log(this);
+        console.log('TableChartMode ===========================================================');
     }
 
     /**
