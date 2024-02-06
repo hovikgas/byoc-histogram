@@ -149,38 +149,44 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
     let isOK = true;
     let errorMessages: string[] = ["Histograms need two parameters, an attribute on the X axis and measure on the Y axis."];
 
-    // Find the column entry and not the dimension entry.
-    let dimensions = updatedConfig.filter(_ => _.key === 'column')[0].dimensions;
+    try {
+        // Find the column entry and not the dimension entry.
+        let dimensions = updatedConfig.filter(_ => _.key === 'column')[0].dimensions;
 
-    if (!dimensions) {
-        logmsg('invalid due to missing dimensions');
-        isOK = false;
-    } else if (dimensions.length !== 2) {
-        logmsg('invalid due length of dimensions');
-        isOK = false;
-    } else {  // have two columns, see if they are the right type.
-        const xcols = dimensions.filter(col => col.key === 'x');
-        logmsg('xcols', xcols);
-        const ycols = dimensions.filter(col => col.key === 'y');
-        logmsg('ycols', ycols);
-
-        if (xcols.length != 1 || ycols.length != 1) {
-            logmsg('invalid due number of columns in each');
+        if (!dimensions) {
+            logmsg('invalid due to missing dimensions');
             isOK = false;
-        } else {
-            const xcol = xcols[0].columns[0];
-            const ycol = ycols[0].columns[0];
-            logmsg(`checking types: x: ${xcol.dataType} y: ${ycol.dataType} against ${numericTypes}`);
-            if ((xcol && numericTypes.includes(xcol.dataType)) ||
-                (ycol && !numericTypes.includes(ycol.dataType))) {
-                logmsg('invalid due to column types');
+        } else if (dimensions.length !== 2) {
+            logmsg('invalid due length of dimensions');
+            isOK = false;
+        } else {  // have two columns, see if they are the right type.
+            const xcols = dimensions.filter(col => col.key === 'x');
+            logmsg('xcols', xcols);
+            const ycols = dimensions.filter(col => col.key === 'y');
+            logmsg('ycols', ycols);
+
+            if (xcols.length != 1 || ycols.length != 1) {
+                logmsg('invalid due number of columns in each');
                 isOK = false;
+            } else {
+                const xcol = xcols[0].columns.length > 0 ? xcols[0].columns[0] : undefined;
+                const ycol = ycols[0].columns.length > 0 ? ycols[0].columns[0] : undefined;
+                logmsg(`checking types: x: ${xcol} y: ${ycol} against ${numericTypes}`);
+                if ((xcol && numericTypes.includes(xcol.dataType)) ||
+                    (ycol && !numericTypes.includes(ycol.dataType))) {
+                    logmsg('invalid due to column types');
+                    isOK = false;
+                }
             }
         }
+    } catch (e) {
+        isOK = false;
+        errorMessages.push("" + e);
     }
 
-    console.log('isOK?  ' + isOK);
-    return {isValid: isOK, validationErrorMessage: isOK ? [""] : errorMessages};
+    const res = {isValid: isOK, validationErrorMessage: isOK ? [""] : errorMessages};
+    console.log(res);
+    return res;
 }
 
 /**
