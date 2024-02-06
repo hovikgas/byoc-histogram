@@ -20,6 +20,8 @@ import {
     Query, ValidationResponse, VisualPropEditorDefinition
 } from "@thoughtspot/ts-chart-sdk";
 
+// Declare the numeric types for quick checking.
+const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
 
 const logmsg = (msg: string, data: any = "") => {
     console.log(`Histogram: ${msg}`, data);
@@ -43,7 +45,6 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
     const column_key = 'measure';
     let configColumns: ChartColumn[];
 
-    const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
     const dataColumns = tableModel.getColumnsWithDataTypes(numericTypes);
     configColumns = [tableModel.getChartColumn(dataColumns[0].columnId)]; // just using one.
 
@@ -134,14 +135,47 @@ const getQueriesFromChartConfig = (
     return queries;
 }
 
-// ((updatedConfig: ChartConfig[], chartModel: ChartModel) => ValidationResponse)
+/**
+ * The chart can only have a measure (numeric) on the Y axis and attribute (non-numeric) on the X axis.
+ * @param updatedConfig The config from ThoughtSpot.
+ * @param chartModel The chart model from ThoughtSpot.
+ */
 const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel): ValidationResponse => {
 
     logmsg('validating the chart config');
     logmsg('updatedConfig', updatedConfig);
     logmsg('chartModel', chartModel);
-    // TODO update to say if it's accurate or not.
-    return { isValid: true, validationErrorMessage: [""] }
+
+    let isOK = true;
+    let errorMessages: string[] = ["Histograms need two parameters, an attribute on the X axis and measure on the Y axis."];
+
+    // Find the column entry and not the dimension entry.
+    let dimensions;
+
+    for (const _ of updatedConfig) {
+        if (_.key === 'columns') {
+            dimensions = _.dimensions;
+        }
+    }
+
+    if (!dimensions) {
+        isOK = false;
+    } else if (dimensions.length !== 2) {
+        isOK = false;
+    } else {  // have two columns, see if they are the right type.
+        const xcol = dimensions.filter(col => col.key === 'x');
+        const ycol = dimensions.filter(col => col.key === 'y');
+
+        if (xcol.length != 1 || ycol.length != 1) {
+            isOK = false;
+        } else {
+            if ((xcol[0].columns[0].type in numericTypes) || !(ycol[0].columns[0].type in numericTypes)) {
+                isOK = false;
+            }
+        }
+    }
+
+    return {isValid: isOK, validationErrorMessage: errorMessages}
 }
 
 /**
