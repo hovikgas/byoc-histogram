@@ -71,8 +71,8 @@ const getChartConfigEditorDefinition = (): ChartConfigEditorDefinition[] => {
                 {
                     key: 'x',
                     label: 'Custom X Axis',
-                    allowAttributeColumns: false,
-                    allowMeasureColumns: true,
+                    allowAttributeColumns: true,
+                    allowMeasureColumns: false,
                     allowTimeSeriesColumns: true,
                     maxColumnCount: 1,
                 },
