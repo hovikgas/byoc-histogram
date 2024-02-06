@@ -141,6 +141,7 @@ const getQueriesFromChartConfig = (
  * @param chartModel The chart model from ThoughtSpot.
  */
 const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel): ValidationResponse => {
+    // TODO - abstract the config to make it easier to work with.
 
     logmsg('validating the chart config');
     logmsg('updatedConfig', updatedConfig);
