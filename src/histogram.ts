@@ -11,13 +11,13 @@ import {TableChartModel} from "./TableChartModel.ts";
 
 import {
     ChartColumn,
-    ChartConfig,
+    ChartConfig, ChartConfigEditorDefinition,
     ChartModel,
     ChartToTSEvent,
     CustomChartContext,
     DataType,
     getChartContext,
-    Query
+    Query, VisualPropEditorDefinition
 } from "@thoughtspot/ts-chart-sdk";
 
 
@@ -59,6 +59,67 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
     }
 
     return [defaultChartConfig];
+}
+
+const getChartConfigEditorDefinition = (): ChartConfigEditorDefinition[] => {
+    return [
+        {
+            key: 'column',
+            label: 'Custom Column',
+            descriptionText: 'must provide one attribute and one measure',
+            columnSections: [
+                {
+                    key: 'x',
+                    label: 'Custom X Axis',
+                    allowAttributeColumns: false,
+                    allowMeasureColumns: true,
+                    allowTimeSeriesColumns: true,
+                    maxColumnCount: 1,
+                },
+                {
+                    key: 'y',
+                    label: 'Custom Y Axis',
+                    allowAttributeColumns: false,
+                    allowMeasureColumns: true,
+                    allowTimeSeriesColumns: false,
+                },
+            ]
+        }
+    ]
+}
+
+const getVisualPropEditorDefinition = (): VisualPropEditorDefinition => {
+    return {
+        elements: [
+            {
+                key: 'color',
+                type: 'radio',
+                defaultValue: 'red',
+                values: ['red', 'green', 'yellow'],
+                label: 'Colors',
+            },
+            {
+                type: 'section',
+                key: 'accordion',
+                label: 'Accordion',
+                children: [
+                    {
+                        key: 'Color2',
+                        type: 'radio',
+                        defaultValue: 'blue',
+                        values: ['blue', 'white', 'red'],
+                        label: 'Color2',
+                    },
+                    {
+                        key: 'datalabels',
+                        type: 'toggle',
+                        defaultValue: false,
+                        label: 'Data Labels',
+                    },
+                ],
+            },
+        ],
+    }
 }
 
 /**
@@ -209,6 +270,8 @@ const init = async () => {
         getDefaultChartConfig: getDefaultChartConfig,
         getQueriesFromChartConfig: getQueriesFromChartConfig,
         renderChart: renderChart,
+        chartConfigEditorDefinition: getChartConfigEditorDefinition(),
+        visualPropEditorDefinition: getVisualPropEditorDefinition(),
     });
     logmsg('rendering');
     renderChart(ctx);
