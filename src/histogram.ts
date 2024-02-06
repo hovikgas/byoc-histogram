@@ -161,9 +161,9 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
             isOK = false;
         } else {  // have two columns, see if they are the right type.
             const xcols = dimensions.filter(col => col.key === 'x');
-            logmsg('xcols', xcols);
+            logmsg(`ycols with length ${xcols.length}`, xcols);
             const ycols = dimensions.filter(col => col.key === 'y');
-            logmsg('ycols', ycols);
+            logmsg(`ycols with length ${ycols.length}`, ycols);
 
             if (xcols.length != 1 || ycols.length != 1) {
                 logmsg('invalid due number of columns in each');
