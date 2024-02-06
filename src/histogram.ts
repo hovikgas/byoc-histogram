@@ -17,7 +17,7 @@ import {
     CustomChartContext,
     DataType,
     getChartContext,
-    Query, VisualPropEditorDefinition
+    Query, ValidationResponse, VisualPropEditorDefinition
 } from "@thoughtspot/ts-chart-sdk";
 
 
@@ -82,6 +82,7 @@ const getChartConfigEditorDefinition = (): ChartConfigEditorDefinition[] => {
                     allowAttributeColumns: false,
                     allowMeasureColumns: true,
                     allowTimeSeriesColumns: false,
+                    maxColumnCount: 1,
                 },
             ]
         }
@@ -131,6 +132,16 @@ const getQueriesFromChartConfig = (
     logmsg('queries: ', queries);
 
     return queries;
+}
+
+// ((updatedConfig: ChartConfig[], chartModel: ChartModel) => ValidationResponse)
+const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel): ValidationResponse => {
+
+    logmsg('validating the chart config');
+    logmsg('updatedConfig', updatedConfig);
+    logmsg('chartModel', chartModel);
+    // TODO update to say if it's accurate or not.
+    return { isValid: true, validationErrorMessage: [""] }
 }
 
 /**
@@ -248,6 +259,7 @@ const init = async () => {
     // Standard init with required properties.
     const ctx = await getChartContext({
         getDefaultChartConfig: getDefaultChartConfig,
+        validateConfig: getValidateConfig,
         getQueriesFromChartConfig: getQueriesFromChartConfig,
         renderChart: renderChart,
         chartConfigEditorDefinition: getChartConfigEditorDefinition(),
