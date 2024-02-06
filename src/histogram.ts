@@ -150,13 +150,7 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
     let errorMessages: string[] = ["Histograms need two parameters, an attribute on the X axis and measure on the Y axis."];
 
     // Find the column entry and not the dimension entry.
-    let dimensions;
-
-    for (const _ of updatedConfig) {
-        if (_.key === 'columns') {
-            dimensions = _.dimensions;
-        }
-    }
+    let dimensions = updatedConfig.filter(_ => _.key === 'column')[0].dimensions;
 
     if (!dimensions) {
         logmsg('invalid due to missing dimensions');
