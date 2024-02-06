@@ -171,7 +171,8 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
             const xcol = xcols[0].columns[0];
             const ycol = ycols[0].columns[0];
             logmsg(`checking types: x: ${xcol.dataType} y: ${ycol.dataType} against ${numericTypes}`);
-            if (numericTypes.includes(xcol.dataType) || !numericTypes.includes(ycol.dataType)) {
+            if ((xcol && numericTypes.includes(xcol.dataType)) ||
+                (ycol && !numericTypes.includes(ycol.dataType))) {
                 logmsg('invalid due to column types');
                 isOK = false;
             }
