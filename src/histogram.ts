@@ -178,7 +178,7 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
         }
     }
 
-    return {isValid: isOK, validationErrorMessage: errorMessages}
+    return {isValid: isOK, validationErrorMessage: isOK ? [""] : errorMessages};
 }
 
 /**
