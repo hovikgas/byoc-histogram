@@ -161,18 +161,21 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
             logmsg('invalid due length of dimensions');
             isOK = false;
         } else {  // have two columns, see if they are the right type.
-            const xcols = dimensions.filter(col => col.key === 'x');
-            logmsg(`ycols with length ${xcols.length}`, xcols);
-            const ycols = dimensions.filter(col => col.key === 'y');
-            logmsg(`ycols with length ${ycols.length}`, ycols);
 
-            if (xcols.length != 1 || ycols.length != 1) {
+            // Only need to check for the first column since only expecting one.
+            const xcols = dimensions.filter(col => col.key === 'x');
+            logmsg(`xcols with length ${xcols[0].columns.length}`, xcols);
+            const ycols = dimensions.filter(col => col.key === 'y');
+            logmsg(`ycols with length ${ycols[0].columns.length}`, ycols);
+
+            if (xcols[0].columns.length != 1 || ycols[0].columns.length != 1) {
                 logmsg('invalid due number of columns in each');
                 isOK = false;
             } else {
                 const xcol = xcols[0].columns.length > 0 ? xcols[0].columns[0] : undefined;
                 const ycol = ycols[0].columns.length > 0 ? ycols[0].columns[0] : undefined;
                 logmsg(`checking types: x: ${xcol} y: ${ycol} against ${numericTypes}`);
+
                 if ((xcol && numericTypes.includes(xcol.dataType)) ||
                     (ycol && !numericTypes.includes(ycol.dataType))) {
                     logmsg('invalid due to column types');
