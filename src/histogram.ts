@@ -92,96 +92,102 @@ const getQueriesFromChartConfig = (
     return queries;
 }
 
-//const getDataModel = (chartModel: ChartModel) => {
-//}
+/**
+ * This function does the actual rendering of the chart.  It needs to be called in the context of emitters.
+ * See renderChart.
+ */
+const _renderChart = async (context: CustomChartContext): Promise<void> => {
+
+
+    logmsg('render chart ================================');
+    logmsg('context: ', context);
+
+    // Original code from https://jsfiddle.net/api/post/library/pure/
+
+    /*  Data from example.
+    const data = [3.5, 3, 3.2, 3.1, 3.6, 3.9, 3.4, 3.4, 2.9, 3.1, 3.7, 3.4, 3, 3,
+        4, 4.4, 3.9, 3.5, 3.8, 3.8, 3.4, 3.7, 3.6, 3.3, 3.4, 3, 3.4, 3.5, 3.4,
+        3.2, 3.1, 3.4, 4.1, 4.2, 3.1, 3.2, 3.5, 3.6, 3, 3.4, 3.5, 2.3, 3.2, 3.5,
+        3.8, 3, 3.8, 3.2, 3.7, 3.3, 3.2, 3.2, 3.1, 2.3, 2.8, 2.8, 3.3, 2.4, 2.9,
+        2.7, 2, 3, 2.2, 2.9, 2.9, 3.1, 3, 2.7, 2.2, 2.5, 3.2, 2.8, 2.5, 2.8, 2.9,
+        3, 2.8, 3, 2.9, 2.6, 2.4, 2.4, 2.7, 2.7, 3, 3.4, 3.1, 2.3, 3, 2.5, 2.6,
+        3, 2.6, 2.3, 2.7, 3, 2.9, 2.9, 2.5, 2.8, 3.3, 2.7, 3, 2.9, 3, 3, 2.5, 2.9,
+        2.5, 3.6, 3.2, 2.7, 3, 2.5, 2.8, 3.2, 3, 3.8, 2.6, 2.2, 3.2, 2.8, 2.8, 2.7,
+        3.3, 3.2, 2.8, 3, 2.8, 3, 2.8, 3.8, 2.8, 2.8, 2.6, 3, 3.4, 3.1, 3, 3.1,
+        3.1, 3.1, 2.7, 3.2, 3.3, 3, 2.5, 3, 3.4, 3];
+     */
+
+    const chartModel = context.getChartModel()!;
+    logmsg('Chart model: ', chartModel);
+    const tableModel = new TableChartModel(chartModel);
+    logmsg('tableModel: ', tableModel);
+
+    // TODO Should this be abstracted more?
+    const measureName = chartModel.config.chartConfig![0].dimensions[0].columns[0].name;
+    logmsg(`measure name: ${measureName}`);
+
+    let data: number[] = tableModel.getDataForColumnName(measureName);
+    logmsg('checking data');
+    if (data === undefined) {
+        logmsg('setting data to []');
+        data = [];  // make empty if no data.
+    }
+    logmsg('data: ', data);
+
+    Highcharts.chart('container', {
+        title: {
+            text: 'Highcharts Histogram In ThoughtSpot'
+        },
+
+        xAxis: [{
+            title: {text: measureName},
+            alignTicks: false
+        }, {
+            title: {text: 'Histogram'},
+            alignTicks: false,
+            opposite: true
+        }],
+
+        yAxis: [{
+            title: {text: 'Data'}  // set to be the measure name
+        }, {
+            title: {text: 'Histogram'},
+            opposite: true
+        }],
+
+        plotOptions: {
+            histogram: {
+                accessibility: {
+                    point: {
+                        valueDescriptionFormat: '{index}. {point.x:.3f} to {point.x2:.3f}, {point.y}.'
+                    }
+                }
+            }
+        },
+
+        series: [{
+            name: 'Histogram',
+            type: 'histogram',
+            xAxis: 1,
+            yAxis: 1,
+            baseSeries: 's1',
+            zIndex: -1
+        }, {
+            name: 'Data',
+            type: 'scatter',
+            data: data,
+            id: 's1',
+            marker: {
+                radius: 1.5
+            }
+        }]
+    });
+}
 
 const renderChart = async (context: CustomChartContext): Promise<void> => {
     try {
         context.emitEvent(ChartToTSEvent.RenderStart);  // tell TS we are starting.
-
-        logmsg('render chart ================================');
-        logmsg('context: ', context);
-
-        // Original code from https://jsfiddle.net/api/post/library/pure/
-
-        /*  Data from example.
-        const data = [3.5, 3, 3.2, 3.1, 3.6, 3.9, 3.4, 3.4, 2.9, 3.1, 3.7, 3.4, 3, 3,
-            4, 4.4, 3.9, 3.5, 3.8, 3.8, 3.4, 3.7, 3.6, 3.3, 3.4, 3, 3.4, 3.5, 3.4,
-            3.2, 3.1, 3.4, 4.1, 4.2, 3.1, 3.2, 3.5, 3.6, 3, 3.4, 3.5, 2.3, 3.2, 3.5,
-            3.8, 3, 3.8, 3.2, 3.7, 3.3, 3.2, 3.2, 3.1, 2.3, 2.8, 2.8, 3.3, 2.4, 2.9,
-            2.7, 2, 3, 2.2, 2.9, 2.9, 3.1, 3, 2.7, 2.2, 2.5, 3.2, 2.8, 2.5, 2.8, 2.9,
-            3, 2.8, 3, 2.9, 2.6, 2.4, 2.4, 2.7, 2.7, 3, 3.4, 3.1, 2.3, 3, 2.5, 2.6,
-            3, 2.6, 2.3, 2.7, 3, 2.9, 2.9, 2.5, 2.8, 3.3, 2.7, 3, 2.9, 3, 3, 2.5, 2.9,
-            2.5, 3.6, 3.2, 2.7, 3, 2.5, 2.8, 3.2, 3, 3.8, 2.6, 2.2, 3.2, 2.8, 2.8, 2.7,
-            3.3, 3.2, 2.8, 3, 2.8, 3, 2.8, 3.8, 2.8, 2.8, 2.6, 3, 3.4, 3.1, 3, 3.1,
-            3.1, 3.1, 2.7, 3.2, 3.3, 3, 2.5, 3, 3.4, 3];
-         */
-
-        const chartModel = context.getChartModel()!;
-        logmsg('Chart model: ', chartModel);
-        const tableModel = new TableChartModel(chartModel);
-        logmsg('tableModel: ', tableModel);
-
-        // TODO Should this be abstracted more?
-        const measureName = chartModel.config.chartConfig![0].dimensions[0].columns[0].name;
-        logmsg(`measure name: ${measureName}`);
-
-        let data: number[] = tableModel.getDataForColumnName(measureName);
-        logmsg('checking data');
-        if (data === undefined) {
-            logmsg('setting data to []');
-            data = [];  // make empty if no data.
-        }
-        logmsg('data: ', data);
-
-        Highcharts.chart('container', {
-            title: {
-                text: 'Highcharts Histogram In ThoughtSpot'
-            },
-
-            xAxis: [{
-                title: {text: measureName},
-                alignTicks: false
-            }, {
-                title: {text: 'Histogram'},
-                alignTicks: false,
-                opposite: true
-            }],
-
-            yAxis: [{
-                title: {text: 'Data'}  // set to be the measure name
-            }, {
-                title: {text: 'Histogram'},
-                opposite: true
-            }],
-
-            plotOptions: {
-                histogram: {
-                    accessibility: {
-                        point: {
-                            valueDescriptionFormat: '{index}. {point.x:.3f} to {point.x2:.3f}, {point.y}.'
-                        }
-                    }
-                }
-            },
-
-            series: [{
-                name: 'Histogram',
-                type: 'histogram',
-                xAxis: 1,
-                yAxis: 1,
-                baseSeries: 's1',
-                zIndex: -1
-            }, {
-                name: 'Data',
-                type: 'scatter',
-                data: data,
-                id: 's1',
-                marker: {
-                    radius: 1.5
-                }
-            }]
-        });
+        _renderChart(context);
     } catch (e) {
         // Tell TS there was an error.
         context.emitEvent(ChartToTSEvent.RenderError, {
