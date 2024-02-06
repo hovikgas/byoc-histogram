@@ -159,17 +159,21 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
     }
 
     if (!dimensions) {
+        logmsg('invalid due to missing dimensions');
         isOK = false;
     } else if (dimensions.length !== 2) {
+        logmsg('invalid due length of dimensions');
         isOK = false;
     } else {  // have two columns, see if they are the right type.
         const xcol = dimensions.filter(col => col.key === 'x');
         const ycol = dimensions.filter(col => col.key === 'y');
 
         if (xcol.length != 1 || ycol.length != 1) {
+            logmsg('invalid due number of columns in each');
             isOK = false;
         } else {
             if ((xcol[0].columns[0].type in numericTypes) || !(ycol[0].columns[0].type in numericTypes)) {
+                logmsg('invalid due to column types');
                 isOK = false;
             }
         }
