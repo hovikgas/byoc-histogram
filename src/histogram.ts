@@ -19,6 +19,7 @@ import {
     getChartContext,
     Query, ValidationResponse, VisualPropEditorDefinition
 } from "@thoughtspot/ts-chart-sdk";
+import {TSChartConfigList} from "./TSChartConfig.ts";
 
 // Declare the numeric types for quick checking.
 const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
@@ -147,43 +148,53 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
     logmsg('updatedConfig', updatedConfig);
     logmsg('chartModel', chartModel);
 
+    const chartConfigList = new TSChartConfigList(updatedConfig);
+
     let isOK = true;
     let errorMessages: string[] = ["Histograms need two parameters, an attribute on the X axis and measure on the Y axis."];
 
     try {
         // Find the column entry and not the dimension entry.
-        let dimensions = updatedConfig.filter(_ => _.key === 'column')[0].dimensions;
+        // let dimensions = updatedConfig.filter(_ => _.key === 'column')[0].dimensions;
+        let columnConfig = chartConfigList.getConfig('column');
 
-        if (!dimensions) {
-            logmsg('invalid due to missing dimensions');
+        if (!columnConfig) {
+            logmsg('invalid due to missing "column" configuration');
             isOK = false;
-        } else if (dimensions.length !== 2) {
-            logmsg('invalid due length of dimensions');
-            isOK = false;
-        } else {  // have two columns, see if they are the right type.
+        } else {
 
-            // Only need to check for the first column since only expecting one.
-            const xcols = dimensions.filter(col => col.key === 'x');
-            logmsg(`xcols with length ${xcols[0].columns.length}`, xcols);
-            const ycols = dimensions.filter(col => col.key === 'y');
-            logmsg(`ycols with length ${ycols[0].columns.length}`, ycols);
+            const dimensions = columnConfig.dimensions;
 
-            if (xcols[0].columns.length != 1 || ycols[0].columns.length != 1) {
-                logmsg('invalid due number of columns in each');
+            if (dimensions.length !== 2) {
+                logmsg(`invalid due number of dimensions (${dimensions.length} !== 2)`);
                 isOK = false;
-            } else {
-                const xcol = xcols[0].columns.length > 0 ? xcols[0].columns[0] : undefined;
-                const ycol = ycols[0].columns.length > 0 ? ycols[0].columns[0] : undefined;
-                logmsg(`checking types: x: ${xcol} y: ${ycol} against ${numericTypes}`);
+            } else {  // have two columns, see if they are the right type.
 
-                if ((xcol && numericTypes.includes(xcol.dataType)) ||
-                    (ycol && !numericTypes.includes(ycol.dataType))) {
-                    logmsg('invalid due to column types');
+                // Only need to check for the first column since only expecting one.
+                const xdim = dimensions.getDimension('x');
+                console.log(xdim);
+                const ydim = dimensions.getDimension('y');
+                console.log(ydim);
+
+                if (xdim.numberColumns() != 1 || ydim.numberColumns() != 1) {
+                    logmsg('invalid due number of columns in each');
                     isOK = false;
+                } else {
+                    // At this point we know there's one column in each.
+                    const xcol = xdim.columns[0];
+                    const ycol = ydim.columns[0]
+                    logmsg(`checking types: x: ${xcol} y: ${ycol} against ${numericTypes}`);
+
+                    if ((xcol && numericTypes.includes(xcol.dataType)) ||
+                        (ycol && !numericTypes.includes(ycol.dataType))) {
+                        logmsg('invalid due to column types');
+                        isOK = false;
+                    }
                 }
             }
         }
-    } catch (e) {
+    } catch
+        (e) {
         isOK = false;
         errorMessages.push("" + e);
     }
