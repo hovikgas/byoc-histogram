@@ -185,9 +185,9 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
                     const ycol = ydim.columns[0]
                     logmsg(`checking types: x: ${xcol} y: ${ycol} against ${numericTypes}`);
 
-                    if ((xcol && numericTypes.includes(xcol.dataType)) ||
-                        (ycol && !numericTypes.includes(ycol.dataType))) {
-                        logmsg('invalid due to column types');
+                    // Make sure the y-axis is a number
+                    if (ycol && !numericTypes.includes(ycol.dataType)) {
+                        logmsg('invalid due to non-numeric Y axis type');
                         isOK = false;
                     }
                 }
