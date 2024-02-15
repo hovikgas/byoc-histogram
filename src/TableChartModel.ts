@@ -101,7 +101,9 @@ export class TableChartModel {
             let idx = 0;  // tracks column indexes to get the correct data.
             for (const colId of queryData.data.columns) {
                 const cname = this.getColumnNameForId(colId)!;
-                // Load the column of data.  Assuming they are the same length.
+                this._data[cname] = [];
+
+                // Load the column of data.  Assuming all columns are the same length.
                 for (const dataValue of queryData.data.dataValue) {
                     this._data[cname].push(dataValue[idx]); // Probably OK to not copy.
                 }
