@@ -41,7 +41,9 @@
  *     }
  */
 
-import {ChartModel, DataType, ColumnType, ChartColumn} from "@thoughtspot/ts-chart-sdk";
+import {ChartModel, DataType, ColumnType, ChartColumn, QueryData} from "@thoughtspot/ts-chart-sdk";
+
+import {arraysAreEqual} from "./util.ts";
 
 interface ColumnDescription {
     columnName: string;
@@ -63,9 +65,9 @@ export class TableChartModel {
 
         this._populate(chartModel);
 
-        console.log('TableChartMode ===========================================================');
+        console.log('TableChartModel ===========================================================');
         console.log(this);
-        console.log('TableChartMode ===========================================================');
+        console.log('TableChartModel ===========================================================');
     }
 
     /**
@@ -91,48 +93,76 @@ export class TableChartModel {
         }
         console.log('TableChartModel: columns === ', this._columns);
 
-        /*
-           "data": [
-             {
-               "data": [
-                 {
-                   "columnId": "79344559-4c71-45c6-be33-450316eab54d",
-                   "columnDataType": "CHAR",
-                   "dataValue": [
-                     "Project 1",
-                     "Project 1",
-                     "Project 1",
-                     "Project 1",
-                     "Project 2",
-                     "Project 2",
-                     "Project 2",
-                     "Project 2"
-                     ]
-                   },
-                 ...
-               ]
-             }
-           ],
-           ... // but probably only one
-        */
+        const queryData = this.findDataValue(this._columns, chartModel);
 
-        console.log('TableChartModel: chartModel.data === ', chartModel.data);
+        console.log('TableChartModel: query data === ', queryData);
 
-        if (chartModel.data && chartModel.data.length > 0) {
-            // Only using the first data.  It's not clear what the other data items are for.
-            const cmData = chartModel.data;
-            const firstQueryData = cmData[0];
-            const queryDataData = firstQueryData.data;
-            console.log('query data data: ', queryDataData);
-            const firstData = queryDataData.dataValue[0];
-            console.log('first data: ', firstData);
-            for (const c of firstData) { // each data array has an ID and dataValue array.
-                const cname = this.getColumnNameForId(c.columnId)!;
-                this._data[cname] = c.dataValue; // Probably OK to not copy.
+        if (queryData) {
+            let idx = 0;  // tracks column indexes to get the correct data.
+            for (const colId of queryData.data.columns) {
+                const cname = this.getColumnNameForId(colId)!;
+                // Load the column of data.  Assuming they are the same length.
+                for (const dataValue of queryData.data.dataValue) {
+                    this._data[cname].push(dataValue[idx]); // Probably OK to not copy.
+                }
+                idx += 1;
             }
         }
 
         console.log('TableChartModel: data === ', this._data);
+    }
+
+    /**
+     * Looks at the columns and then searches the data for the entry that contains the actual data values.
+     * @param columns List of columns to get the data object for.
+     * @param chartModel The chart model to find the data values in.
+     * @private
+     */
+    private findDataValue(columns: ColumnDescription[], chartModel: ChartModel): QueryData | null {
+
+        /*
+        The data object looks like the following.  To understand the correct one to choose, you have to compare
+        to the columns object.
+        "data": [
+        {
+            "data": {
+                "columns": [
+                    "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a"
+                ],
+                "dataValue": [
+                    [
+                        350
+                    ]
+                ]
+            },
+            "totalRowCount": 1
+        },
+        {
+            "data": {
+                "columns": [
+                    "3e240931-a952-48ff-b748-e5d647f2d125",
+                    "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a"
+                ],
+                "dataValue": [
+                    [
+                        "Shirts",
+                        119
+                    ],
+             ...
+             }
+         ]
+        */
+
+        if (chartModel.data) {
+            for (const d of chartModel.data) {
+              if (arraysAreEqual(d.data.columns, columns.map(item => item.columnId))) {
+                  return d;
+              }
+            }
+        }
+
+        return null;
+
     }
 
     /**
