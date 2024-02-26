@@ -214,7 +214,7 @@ export class TableChartModel {
 
                         const dataValues: any[] = [];
                         for (const rowCnt in d.data.dataValue) {
-                            dataValues.push(d.data.dataValue[colCnt][rowCnt]);
+                            dataValues.push(d.data.dataValue[rowCnt][colCnt]);
                         }
 
                         const dc = new DataColumn(colId, colName, dataValues);
