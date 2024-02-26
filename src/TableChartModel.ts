@@ -85,7 +85,7 @@ class DataDetails {
      * @param id The ID to find.
      */
     getDataById(id: string): DataColumn | undefined {
-        return this._summaries.find(s => s.id === id);
+        return this._data.find(s => s.id === id);
     }
 
     /**
@@ -93,7 +93,7 @@ class DataDetails {
      * @param name The name to find.
      */
     getDataByName(name: string): DataColumn | undefined {
-        return this._summaries.find(s => s.name === name);
+        return this._data.find(s => s.name === name);
     }
 
 }
@@ -279,7 +279,7 @@ export class TableChartModel {
         console.log(`TableChartModel: getting y data for columns ${this.yColumns}`);
         const data: DataColumn[] = [];
         for (const columnID of this.yColumns) {
-            console.log(`TableChartModel: data for column ${columnID}`);
+            console.log(`TableChartModel: data for column ${columnID}`, this._data.getDataById(columnID));
             data.push(this._data.getDataById(columnID)!);
         }
         return data;
