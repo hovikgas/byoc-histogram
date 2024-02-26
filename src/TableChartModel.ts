@@ -246,8 +246,8 @@ export class TableChartModel {
 
     getXData (): DataColumn[] {
         const data: DataColumn[] = [];
-        for (const cname of this.xColumns) {
-            data.push(this._data.getDataByName(cname)!);
+        for (const columnID of this.xColumns) {
+            data.push(this._data.getDataById(columnID)!);
         }
         return data;
     }
@@ -263,9 +263,9 @@ export class TableChartModel {
     getYData (): DataColumn[] {
         console.log(`TableChartModel: getting y data for columns ${this.yColumns}`);
         const data: DataColumn[] = [];
-        for (const cname of this.yColumns) {
-            console.log(`TableChartModel: data for column ${cname}`);
-            data.push(this._data.getDataByName(cname)!);
+        for (const columnID of this.yColumns) {
+            console.log(`TableChartModel: data for column ${columnID}`);
+            data.push(this._data.getDataById(columnID)!);
         }
         return data;
     }
