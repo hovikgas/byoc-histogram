@@ -322,4 +322,4 @@ const init = async () => {
     await renderChart(ctx);
 };
 
-await init();
+init();
