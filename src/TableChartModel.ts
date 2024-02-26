@@ -11,7 +11,7 @@
  * The config with the dimensions (x,y), describes the chart configuration and is typically the one needed for rendering.
  */
 
-import {ChartColumn, ChartModel, } from "@thoughtspot/ts-chart-sdk";
+import {ChartColumn, ChartModel,} from "@thoughtspot/ts-chart-sdk";
 
 class DataColumn {
     id: string;
@@ -203,20 +203,26 @@ export class TableChartModel {
         console.log('TableChartModel: populating data columns =========================');
         for (const d of this._chartModel.data!) {
             console.log('  data query data === ', d);
-            if (d.data.columns.length > 1) {
-                try {
-                    const colId = d.data.columns[0];
-                    const column = this.allColumns.find(c => c.id === colId)!;
-                    const colName = column.name;
-                    const dataValues = d.data.dataValue[0];
+            if (d.data.columns.length > 1) { // TODO need to populate for each column.
+                // The data is an array of row values, where each row aligns with columns,
+                // in the same order.
+                for (const colCnt in d.data.columns) {  // go through by column.
+                    try {
+                        const colId = d.data.columns[colCnt];
+                        const column = this.allColumns.find(c => c.id === colId)!;
+                        const colName = column.name;
 
-                    const dc = new DataColumn(colId, colName, dataValues);
-                    this._data.addData(dc);
-                    console.log(' adding data data ', dc);
+                        const dataValues: any[] = [];
+                        for (const rowCnt in d.data.dataValue) {
+                            dataValues.push(d.data.dataValue[colCnt][rowCnt]);
+                        }
 
-                    return;  // just use one.
-                } catch (e) {
-                    console.error(`Error loading summary columns: ${e}`);
+                        const dc = new DataColumn(colId, colName, dataValues);
+                        this._data.addData(dc);
+                        console.log(' adding data data ', dc);
+                    } catch (e) {
+                        console.error(`Error loading summary columns: ${e}`);
+                    }
                 }
 
             }
@@ -238,8 +244,7 @@ export class TableChartModel {
                             for (const col of d.columns) {
                                 this.xColumns.push(col.id);
                             }
-                        }
-                        else if (d.key === 'y') {
+                        } else if (d.key === 'y') {
                             for (const col of d.columns) {
                                 this.yColumns.push(col.id);
                             }
@@ -250,11 +255,11 @@ export class TableChartModel {
         }
     }
 
-    getXColumnNames (): string[] {
+    getXColumnNames(): string[] {
         return this.xColumns;
     }
 
-    getXData (): DataColumn[] {
+    getXData(): DataColumn[] {
         const data: DataColumn[] = [];
         for (const columnID of this.xColumns) {
             data.push(this._data.getDataById(columnID)!);
@@ -266,11 +271,11 @@ export class TableChartModel {
      * Retrieves the names of the Y-columns associated with the current instance.
      * @return {string[]} An array of strings representing the names of the Y-columns.
      */
-    getYColumnNames (): string[] {
+    getYColumnNames(): string[] {
         return this.yColumns;
     }
 
-    getYData (): DataColumn[] {
+    getYData(): DataColumn[] {
         console.log(`TableChartModel: getting y data for columns ${this.yColumns}`);
         const data: DataColumn[] = [];
         for (const columnID of this.yColumns) {
