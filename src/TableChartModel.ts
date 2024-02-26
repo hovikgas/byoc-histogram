@@ -261,8 +261,10 @@ export class TableChartModel {
     }
 
     getYData (): DataColumn[] {
+        console.log(`TableChartModel: getting y data for columns ${this.yColumns}`);
         const data: DataColumn[] = [];
         for (const cname of this.yColumns) {
+            console.log(`TableChartModel: data for column ${cname}`);
             data.push(this._data.getDataByName(cname)!);
         }
         return data;

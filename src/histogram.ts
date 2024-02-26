@@ -140,12 +140,12 @@ const getQueriesFromChartConfig = (
 const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel): ValidationResponse => {
     // TODO - abstract the config to make it easier to work with.
 
-    logMessage('validating the chart config');
+    logMessage('validating the chart config ==========================');
     logMessage('updatedConfig', updatedConfig);
     logMessage('chartModel', chartModel);
 
     const chartConfigList = new TSChartConfigList(updatedConfig);
-    console.log(chartConfigList);
+    console.log('chartConfigList: ', chartConfigList);
 
     let isOK = true;
     let errorMessages: string[] = ["Histograms need two parameters, an attribute on the X axis and measure on the Y axis."];
@@ -199,6 +199,8 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
 
      */
 
+    logMessage('validating the chart config DONE ==========================');
+
     const res = {isValid: isOK, validationErrorMessage: isOK ? [""] : errorMessages};
     console.log(res);
     return res;
@@ -211,7 +213,7 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
 const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
 
-    logMessage('render chart ================================');
+    logMessage('_render chart ================================');
     logMessage('context: ', context);
 
     // Original code from https://jsfiddle.net/api/post/library/pure/
@@ -287,6 +289,8 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
             }
         }]
     });
+
+    logMessage('_render chart DONE ================================');
 }
 
 const renderChart = async (context: CustomChartContext): Promise<void> => {
