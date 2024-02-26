@@ -239,7 +239,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
     // TODO get the measure name (y-col)
     const measure = tableModel.getYData()[0];
-    logMessage(`measure: ${measure}`);
+    logMessage(`measure: ${JSON.stringify(measure)}`);
 
     Highcharts.chart('container', {
         title: {

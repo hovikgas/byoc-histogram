@@ -160,7 +160,7 @@ export class TableChartModel {
             this._populateDataColumns();
         }
 
-        console.log('TableChartModel: data === ', this.allColumns);
+        console.log('TableChartModel: data === ', this._data);
     }
 
     /**
@@ -168,8 +168,10 @@ export class TableChartModel {
      * @private
      */
     private _populateSummaryColumns(): void {
+        console.log('TableChartModel: populating summary columns =========================');
         // Summary columns are any column in the chart config that consists of a single column and value.
         for (const d of this._chartModel.data!) {
+            console.log('  query data === ', d);
             if (d.data.columns.length === 1 && d.data.dataValue.length === 1) {
                 try {
                     const colId = d.data.columns[0];
@@ -177,6 +179,7 @@ export class TableChartModel {
                     const dataValue = d.data.dataValue[0];
 
                     const dc = new DataColumn(colId, colName, dataValue);
+                    console.log(' adding summary data ', dc);
                     this._data.addSummary(dc);
 
                 } catch (e) {
@@ -185,6 +188,8 @@ export class TableChartModel {
 
             }
         }
+
+        console.log('TableChartModel: populating summary columns DONE =========================');
     }
 
     /**
@@ -195,6 +200,7 @@ export class TableChartModel {
      * @private
      */
     private _populateDataColumns(): void {
+        console.log('TableChartModel: populating data columns =========================');
         for (const d of this._chartModel.data!) {
             if (d.data.columns.length > 1) {
                 try {
@@ -203,7 +209,9 @@ export class TableChartModel {
                     const colName = column.name;
                     const dataValues = d.data.dataValue[0];
 
-                    this._data.addData(new DataColumn(colId, colName, dataValues));
+                    const dc = new DataColumn(colId, colName, dataValues);
+                    this._data.addData(dc);
+                    console.log(' adding data data ', dc);
 
                     return;  // just use one.
                 } catch (e) {
@@ -212,6 +220,7 @@ export class TableChartModel {
 
             }
         }
+        console.log('TableChartModel: populating data columns DONE =========================');
     }
 
     /**
