@@ -171,7 +171,7 @@ export class TableChartModel {
         console.log('TableChartModel: populating summary columns =========================');
         // Summary columns are any column in the chart config that consists of a single column and value.
         for (const d of this._chartModel.data!) {
-            console.log('  query data === ', d);
+            console.log('  summary query data === ', d);
             if (d.data.columns.length === 1 && d.data.dataValue.length === 1) {
                 try {
                     const colId = d.data.columns[0];
@@ -202,6 +202,7 @@ export class TableChartModel {
     private _populateDataColumns(): void {
         console.log('TableChartModel: populating data columns =========================');
         for (const d of this._chartModel.data!) {
+            console.log('  data query data === ', d);
             if (d.data.columns.length > 1) {
                 try {
                     const colId = d.data.columns[0];
