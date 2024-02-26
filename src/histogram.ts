@@ -10,21 +10,21 @@ import "highcharts/es-modules/masters/modules/histogram-bellcurve.src";
 import {TableChartModel} from "./TableChartModel.ts";
 
 import {
-    ChartColumn,
+    // TODO ChartColumn,
     ChartConfig, ChartConfigEditorDefinition,
     ChartModel,
     ChartToTSEvent,
     CustomChartContext,
-    DataType,
+    // TODO DataType,
     getChartContext,
     Query, ValidationResponse, VisualPropEditorDefinition
 } from "@thoughtspot/ts-chart-sdk";
 import {TSChartConfigList} from "./TSChartConfig.ts";
 
 // Declare the numeric types for quick checking.
-const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
+// TODO const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
 
-const logmsg = (msg: string, data: any = "") => {
+const logMessage = (msg: string, data: any = "") => {
     console.log(`Histogram: ${msg}`, data);
 }
 
@@ -34,20 +34,16 @@ const logmsg = (msg: string, data: any = "") => {
  * @return An array of chart configs (https://ts-chart-sdk-docs.vercel.app/interfaces/ChartConfig.html)
  */
 const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
-    logmsg("getting default chart config");
+    logMessage("getting default chart config");
 
     const tableModel = new TableChartModel(chartModel);
 
-    // Make sure there is at least one column and it has to be a number.
-    if (tableModel.length < 1) {
+    // Make sure there is at least one Y column, and it is a number.
+    if (tableModel.allColumns.length < 1) {
         return [];
     }
 
     const column_key = 'measure';
-    let configColumns: ChartColumn[];
-
-    const dataColumns = tableModel.getColumnsWithDataTypes(numericTypes);
-    configColumns = [tableModel.getChartColumn(dataColumns[0].columnId)]; // just using one.
 
     // For a histogram, there aren't any dimensions to worry about.
     const defaultChartConfig: ChartConfig = {
@@ -55,7 +51,7 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
         dimensions: [
             {
                 key: column_key,
-                columns: configColumns
+                columns: [] // tableModel.getYColumnNames()[0] // TODO - Not sure this is correct.
             }
         ]
     }
@@ -113,7 +109,7 @@ const getVisualPropEditorDefinition = (): VisualPropEditorDefinition => {
 const getQueriesFromChartConfig = (
     chartConfig: ChartConfig[]
 ): Array<Query> => {
-    logmsg('chart config: ', chartConfig);
+    logMessage('chart config: ', chartConfig);
     // map all the columns in the config to the query array
     let queries = chartConfig.map(
         (config: ChartConfig): Query =>
@@ -131,7 +127,7 @@ const getQueriesFromChartConfig = (
             ),
     );
 
-    logmsg('queries: ', queries);
+    logMessage('queries: ', queries);
 
     return queries;
 }
@@ -144,50 +140,52 @@ const getQueriesFromChartConfig = (
 const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel): ValidationResponse => {
     // TODO - abstract the config to make it easier to work with.
 
-    logmsg('validating the chart config');
-    logmsg('updatedConfig', updatedConfig);
-    logmsg('chartModel', chartModel);
+    logMessage('validating the chart config');
+    logMessage('updatedConfig', updatedConfig);
+    logMessage('chartModel', chartModel);
 
     const chartConfigList = new TSChartConfigList(updatedConfig);
+    console.log(chartConfigList);
 
     let isOK = true;
     let errorMessages: string[] = ["Histograms need two parameters, an attribute on the X axis and measure on the Y axis."];
 
+    /*  TODO - disabling for now so I can get all the configs.  Re-enable for this chart later.
     try {
         // Find the column entry and not the dimension entry.
         // let dimensions = updatedConfig.filter(_ => _.key === 'column')[0].dimensions;
         let columnConfig = chartConfigList.getConfig('column');
 
         if (!columnConfig) {
-            logmsg('invalid due to missing "column" configuration');
+            logMessage('invalid due to missing "column" configuration');
             isOK = false;
         } else {
 
             const dimensions = columnConfig.dimensions;
 
             if (dimensions.length !== 2) {
-                logmsg(`invalid due number of dimensions (${dimensions.length} !== 2)`);
+                logMessage(`invalid due number of dimensions (${dimensions.length} !== 2)`);
                 isOK = false;
             } else {  // have two columns, see if they are the right type.
 
                 // Only need to check for the first column since only expecting one.
-                const xdim = dimensions.getDimension('x');
-                console.log(xdim);
-                const ydim = dimensions.getDimension('y');
-                console.log(ydim);
+                const xDim = dimensions.getDimension('x');
+                console.log(xDim);
+                const yDim = dimensions.getDimension('y');
+                console.log(yDim);
 
-                if (xdim.numberColumns() != 1 || ydim.numberColumns() != 1) {
-                    logmsg('invalid due number of columns in each');
+                if (xDim.numberColumns() != 1 || yDim.numberColumns() != 1) {
+                    logMessage('invalid due number of columns in each');
                     isOK = false;
                 } else {
                     // At this point we know there's one column in each.
-                    const xcol = xdim.columns[0];
-                    const ycol = ydim.columns[0]
-                    logmsg(`checking types: x: ${xcol} y: ${ycol} against ${numericTypes}`);
+                    const xCol = xDim.columns[0];
+                    const yCol = yDim.columns[0]
+                    logMessage(`checking types: x: ${xCol} y: ${yCol} against ${numericTypes}`);
 
                     // Make sure the y-axis is a number
-                    if (ycol && !numericTypes.includes(ycol.dataType)) {
-                        logmsg('invalid due to non-numeric Y axis type');
+                    if (yCol && !numericTypes.includes(yCol.dataType)) {
+                        logMessage('invalid due to non-numeric Y axis type');
                         isOK = false;
                     }
                 }
@@ -198,6 +196,8 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
         isOK = false;
         errorMessages.push("" + e);
     }
+
+     */
 
     const res = {isValid: isOK, validationErrorMessage: isOK ? [""] : errorMessages};
     console.log(res);
@@ -211,8 +211,8 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
 const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
 
-    logmsg('render chart ================================');
-    logmsg('context: ', context);
+    logMessage('render chart ================================');
+    logMessage('context: ', context);
 
     // Original code from https://jsfiddle.net/api/post/library/pure/
 
@@ -228,23 +228,16 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
         3.3, 3.2, 2.8, 3, 2.8, 3, 2.8, 3.8, 2.8, 2.8, 2.6, 3, 3.4, 3.1, 3, 3.1,
         3.1, 3.1, 2.7, 3.2, 3.3, 3, 2.5, 3, 3.4, 3];
      */
+    // TODO - update to use the new TableChartModel
 
     const chartModel = context.getChartModel()!;
-    logmsg('Chart model: ', chartModel);
+    logMessage('Chart model: ', chartModel);
     const tableModel = new TableChartModel(chartModel);
-    logmsg('tableModel: ', tableModel);
+    logMessage('tableModel: ', tableModel);
 
-    // TODO Should this be abstracted more?
-    const measureName = chartModel.config.chartConfig![0].dimensions[0].columns[0].name;
-    logmsg(`measure name: ${measureName}`);
-
-    let data: number[] = tableModel.getDataForColumnName(measureName);
-    logmsg('checking data');
-    if (data === undefined) {
-        logmsg('setting data to []');
-        data = [];  // make empty if no data.
-    }
-    logmsg('data: ', data);
+    // TODO get the measure name (y-col)
+    const measure = tableModel.getYData()[0];
+    logMessage(`measure: ${measure}`);
 
     Highcharts.chart('container', {
         title: {
@@ -252,7 +245,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
         },
 
         xAxis: [{
-            title: {text: measureName},
+            title: {text: measure.name},
             alignTicks: false
         }, {
             title: {text: 'Histogram'},
@@ -287,7 +280,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
         }, {
             name: 'Data',
             type: 'scatter',
-            data: data,
+            data: measure.values,
             id: 's1',
             marker: {
                 radius: 1.5
@@ -298,23 +291,23 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
 const renderChart = async (context: CustomChartContext): Promise<void> => {
     try {
-        context.emitEvent(ChartToTSEvent.RenderStart);  // tell TS we are starting.
-        _renderChart(context);
+        await context.emitEvent(ChartToTSEvent.RenderStart);  // tell TS we are starting.
+        await _renderChart(context);
     } catch (e) {
         // Tell TS there was an error.
-        context.emitEvent(ChartToTSEvent.RenderError, {
+        await context.emitEvent(ChartToTSEvent.RenderError, {
             hasError: true,
             error: e,
         });
     } finally {
         // Tell TS we are done.
-        context.emitEvent(ChartToTSEvent.RenderComplete);
+        await context.emitEvent(ChartToTSEvent.RenderComplete);
     }
 }
 
 
 const init = async () => {
-    logmsg("init called");
+    logMessage("init called");
 
     // Standard init with required properties.
     const ctx = await getChartContext({
@@ -325,8 +318,8 @@ const init = async () => {
         chartConfigEditorDefinition: getChartConfigEditorDefinition(),
         visualPropEditorDefinition: getVisualPropEditorDefinition(),
     });
-    logmsg('rendering');
-    renderChart(ctx);
+    logMessage('rendering');
+    await renderChart(ctx);
 };
 
-init();
+await init();

@@ -1,0 +1,171 @@
+{
+    "columns": [
+        {
+            "id": "3e240931-a952-48ff-b748-e5d647f2d125",
+            "name": "Product Type",
+            "type": 2,
+            "timeBucket": 0,
+            "dataType": 2,
+            "format": null
+        },
+        {
+            "id": "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a",
+            "name": "Number of Product Name",
+            "type": 1,
+            "timeBucket": 0,
+            "dataType": 4,
+            "format": null
+        },
+        {
+            "id": "abd90fd5-182c-4889-957a-a4c339841590",
+            "name": "Average product type name",
+            "type": 1,
+            "timeBucket": 0,
+            "dataType": 6,
+            "format": null
+        }
+    ],
+    "data": [
+        {
+            "data": {
+                "columns": [
+                    "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a"
+                ],
+                "dataValue": [
+                    [
+                        350
+                    ]
+                ]
+            },
+            "totalRowCount": 1
+        },
+        {
+            "data": {
+                "columns": [
+                    "3e240931-a952-48ff-b748-e5d647f2d125",
+                    "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a"
+                ],
+                "dataValue": [
+                    [
+                        "Shirts",
+                        119
+                    ],
+                    [
+                        "Underwear",
+                        10
+                    ],
+                    [
+                        "Shorts",
+                        40
+                    ],
+                    [
+                        "Pants",
+                        44
+                    ],
+                    [
+                        "Jackets",
+                        28
+                    ],
+                    [
+                        "Sweatshirts",
+                        13
+                    ],
+                    [
+                        "Swimwear",
+                        29
+                    ],
+                    [
+                        "Dresses",
+                        10
+                    ],
+                    [
+                        "Vests",
+                        9
+                    ],
+                    [
+                        "Skirts",
+                        9
+                    ],
+                    [
+                        "Bags",
+                        8
+                    ],
+                    [
+                        "Socks",
+                        9
+                    ],
+                    [
+                        "Jeans",
+                        6
+                    ],
+                    [
+                        "Headwear",
+                        11
+                    ],
+                    [
+                        "Sweaters",
+                        5
+                    ]
+                ]
+            },
+            "totalRowCount": 15
+        }
+    ],
+    "sortInfo": [],
+    "visualProps": {
+        "color": "#B094F8"
+    },
+    "config": {
+        "chartConfig": [
+            {
+                "key": "default",
+                "dimensions": [
+                    {
+                        "key": "measure",
+                        "columns": [
+                            {
+                                "id": "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a",
+                                "name": "Number of Product Name",
+                                "type": 1,
+                                "timeBucket": 0,
+                                "dataType": 4,
+                                "format": null
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "column",
+                "dimensions": [
+                    {
+                        "key": "x",
+                        "columns": [
+                            {
+                                "id": "3e240931-a952-48ff-b748-e5d647f2d125",
+                                "name": "Product Type",
+                                "type": 2,
+                                "timeBucket": 0,
+                                "dataType": 2,
+                                "format": null
+                            }
+                        ]
+                    },
+                    {
+                        "key": "y",
+                        "columns": [
+                            {
+                                "id": "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a",
+                                "name": "Number of Product Name",
+                                "type": 1,
+                                "timeBucket": 0,
+                                "dataType": 4,
+                                "format": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

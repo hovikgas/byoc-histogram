@@ -1,69 +1,123 @@
 /**
  * This file contains a class to make working with the ChartModel easier.
- * The chartModel has the following structure.
- *     {
- *       "columns": [
- *         {
- *           "id": "79344559-4c71-45c6-be33-450316eab54d",
- *           "name": "Column Name",
- *           "type": 2,
- *           "timeBucket": 0,
- *           "dataType": 2,
- *           "format": null
- *         },
- *         ...
- *       ],
- *       "data": [
- *         {
- *           "data": [
- *             {
- *               "columnId": "79344559-4c71-45c6-be33-450316eab54d",
- *               "columnDataType": "CHAR",
- *               "dataValue": [
- *                 "Project 1",
- *                 "Project 1",
- *                 "Project 1",
- *                 "Project 1",
- *                 "Project 2",
- *                 "Project 2",
- *                 "Project 2",
- *                 "Project 2"
- *                 ]
- *               },
- *             ...
- *           ]
- *         }
- *       ],
- *       "sortInfo": [],
- *       "config": {
- *         "chartConfig": []
- *       }
- *     }
+ *
+ * See the chart-model.json for an example of the model structure.
+ * There are three main sections:
+ *   - columns, which describes all the columns in the query.
+ *   - data, which contains multiple data results to include measure summaries and the data values as configured.
+ *   - visualProps, which contains properties defined for the data, such as color or font
+ *   - config, which contains the dimensions that align to each of the data sectons.
+ *
+ * The config with the dimensions (x,y), describes the chart configuration and is typically the one needed for rendering.
  */
 
-import {ChartModel, DataType, ColumnType, ChartColumn, QueryData} from "@thoughtspot/ts-chart-sdk";
+import {ChartColumn, ChartModel, } from "@thoughtspot/ts-chart-sdk";
 
-import {arraysAreEqual} from "./util.ts";
+class DataColumn {
+    id: string;
+    name: string;
+    values: any[] = [];
 
-interface ColumnDescription {
-    columnName: string;
-    columnId: string;
-    columnType: ColumnType;
-    dataType: DataType;
+    constructor(id: string, name: string, values: any[] = []) {
+        this.id = id;
+        this.name = name;
+
+        this.setValues(values);
+    }
+
+    /**
+     * Sets the values, overwriting any that might have been set previously.
+     * @param values
+     */
+    setValues(values: any[]) {
+        this.values = [...values];
+    }
+}
+
+/**
+ * Data details holds the list of columns by name with the associated data values.  The values can be
+ * looked up by name or ID as needed.  Some are the summaries and some are the actual table data.
+ */
+class DataDetails {
+
+    readonly _summaries: DataColumn[];  // contains all the measure summaries.
+    readonly _data: DataColumn[];        // contains the data for the data set.
+
+    constructor() {
+        this._summaries = [];
+        this._data = [];
+    }
+
+    addSummary(dc: DataColumn): void {
+        this._summaries.push(dc);
+    }
+
+    getSummaries(): DataColumn[] {
+        return [...this._summaries];
+    }
+
+    /**
+     * Finds the summary with the given ID and returns it.
+     * @param id The ID to find.
+     */
+    getSummaryById(id: string): DataColumn | undefined {
+        return this._summaries.find(s => s.id === id);
+    }
+
+    /**
+     * Finds the summary with the given name and returns it.
+     * @param name The name to find.
+     */
+    getSummaryByName(name: string): DataColumn | undefined {
+        return this._summaries.find(s => s.name === name);
+    }
+
+    /**
+     * Adds the data column to the data.
+     * @param dc The data column to add.
+     */
+    addData(dc: DataColumn): void {
+        this._data.push(dc);
+    }
+
+    /**
+     * Finds the data with the given ID and returns it.
+     * @param id The ID to find.
+     */
+    getDataById(id: string): DataColumn | undefined {
+        return this._summaries.find(s => s.id === id);
+    }
+
+    /**
+     * Finds the data with the given name and returns it.
+     * @param name The name to find.
+     */
+    getDataByName(name: string): DataColumn | undefined {
+        return this._summaries.find(s => s.name === name);
+    }
+
 }
 
 export class TableChartModel {
-    private _columns: ColumnDescription[];    // List of the column descriptions.
-    private _data: { [key: string]: any[] };  // Data for the columns, indexed by column name.
+    private _chartModel: ChartModel; // original chart model.
+    readonly allColumns: ChartColumn[] = [];    // list of the column descriptions.
+    private _data: DataDetails;  // data in the table model.
+    readonly xColumns: string[] = [];
+    readonly yColumns: string[] = [];
+
+    // private _sortInfo: any;
+    // private visualProps: VisualProps;
 
     constructor(protected chartModel: ChartModel) {
         console.log("TableChartModel: chartModel === ", chartModel);
 
-        this.chartModel = chartModel;
-        this._columns = [];
-        this._data = {};
+        this._chartModel = chartModel;
+        this._data = new DataDetails();
 
-        this._populate(chartModel);
+        this._populateColumns();
+        this._populateData();
+
+        this._setColumnAxes();
 
         console.log('TableChartModel ===========================================================');
         console.log(this);
@@ -71,10 +125,10 @@ export class TableChartModel {
     }
 
     /**
-     * Populates the class with the data from the model.
-     * @param chartModel The TS ChartModel object.
+     * Populates all the column descriptions from the chart model.
+     * @private
      */
-    private _populate(chartModel: ChartModel) {
+    _populateColumns(): void {
         /*
          "columns": [
            {
@@ -88,188 +142,130 @@ export class TableChartModel {
            ...
          ],
          */
-        for (const c of chartModel.columns) {
-            this._columns.push({columnName: c.name, columnId: c.id, columnType: c.type, dataType: c.dataType});
+
+        for (const c of this._chartModel.columns) {
+            this.allColumns.push({...c});
         }
-        console.log('TableChartModel: columns === ', this._columns);
-
-        const queryData = this.findDataValue(this._columns, chartModel);
-
-        console.log('TableChartModel: query data === ', queryData);
-
-        if (queryData) {
-            let idx = 0;  // tracks column indexes to get the correct data.
-            for (const colId of queryData.data.columns) {
-                const cname = this.getColumnNameForId(colId)!;
-                this._data[cname] = [];
-
-                // Load the column of data.  Assuming all columns are the same length.
-                for (const dataValue of queryData.data.dataValue) {
-                    this._data[cname].push(dataValue[idx]); // Probably OK to not copy.
-                }
-                idx += 1;
-            }
-        }
-
-        console.log('TableChartModel: data === ', this._data);
+        console.log('TableChartModel: columns === ', this.allColumns);
     }
 
     /**
-     * Looks at the columns and then searches the data for the entry that contains the actual data values.
-     * @param columns List of columns to get the data object for.
-     * @param chartModel The chart model to find the data values in.
+     * Populates the class with the data from the model.
      * @private
      */
-    private findDataValue(columns: ColumnDescription[], chartModel: ChartModel): QueryData | null {
+    private _populateData() {
 
-        /*
-        The data object looks like the following.  To understand the correct one to choose, you have to compare
-        to the columns object.
-        "data": [
-        {
-            "data": {
-                "columns": [
-                    "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a"
-                ],
-                "dataValue": [
-                    [
-                        350
-                    ]
-                ]
-            },
-            "totalRowCount": 1
-        },
-        {
-            "data": {
-                "columns": [
-                    "3e240931-a952-48ff-b748-e5d647f2d125",
-                    "60a1c539-e1ed-4e7e-ae89-773bfa60ec8a"
-                ],
-                "dataValue": [
-                    [
-                        "Shirts",
-                        119
-                    ],
-             ...
-             }
-         ]
-        */
+        if (this._chartModel.data) {
+            this._populateSummaryColumns();
+            this._populateDataColumns();
+        }
 
-        if (chartModel.data) {
-            for (const d of chartModel.data) {
-              if (arraysAreEqual(d.data.columns, columns.map(item => item.columnId))) {
-                  return d;
-              }
+        console.log('TableChartModel: data === ', this.allColumns);
+    }
+
+    /**
+     * Populates the columns that are only measures.
+     * @private
+     */
+    private _populateSummaryColumns(): void {
+        // Summary columns are any column in the chart config that consists of a single column and value.
+        for (const d of this._chartModel.data!) {
+            if (d.data.columns.length === 1 && d.data.dataValue.length === 1) {
+                try {
+                    const colId = d.data.columns[0];
+                    const colName = this.allColumns.find(c => c.id === colId)!.name;
+                    const dataValue = d.data.dataValue[0];
+
+                    const dc = new DataColumn(colId, colName, dataValue);
+                    this._data.addSummary(dc);
+
+                } catch (e) {
+                    console.error(`Error loading summary columns: ${e}`);
+                }
+
             }
         }
-
-        return null;
-
     }
 
     /**
-     * Returns a list of the column names in the order originally received.
+     * Populates the data columns based on the configuration.
+     * WARNING: This assumes that the data columns are in a section that has multiple
+     * columns and that there is only one set of multi-column data.
+     * TODO: Test this assumption since KPIs may only have one value.
+     * @private
      */
-    get columnNames() {
-        return this._columns.map(c => c.columnName);
-    }
+    private _populateDataColumns(): void {
+        for (const d of this._chartModel.data!) {
+            if (d.data.columns.length > 1) {
+                try {
+                    const colId = d.data.columns[0];
+                    const column = this.allColumns.find(c => c.id === colId)!;
+                    const colName = column.name;
+                    const dataValues = d.data.dataValue[0];
 
-    /**
-     * Returns a list of the column IDs in the order originally received.
-     */
-    get columnIds() {
-        return this._columns.map(c => c.columnId);
-    }
+                    this._data.addData(new DataColumn(colId, colName, dataValues));
 
-    /**
-     * Returns the number of columns in the model.
-     */
-    get length() {
-        return this._columns.length;
-    }
+                    return;  // just use one.
+                } catch (e) {
+                    console.error(`Error loading summary columns: ${e}`);
+                }
 
-    /**
-     * Returns a column name for the given column ID.  Throws an error if not found.
-     * @param columnId The ID to find the name of.
-     */
-    getColumnNameForId(columnId: string): string | undefined {
-        const c = this._columns.find(_ => _.columnId === columnId);
-        return c?.columnName;
-    }
-
-    /**
-     * Returns a column ID for the given column name.  Throws an error if not found.
-     * @param columnName The name to find the ID of.
-     */
-    getColumnIdForName(columnName: string): string | undefined {
-        const c = this._columns.find(_ => _.columnName === columnName);
-        return c?.columnId;
-    }
-
-    /**
-     * Returns the data for the column with the given name.
-     * @param columnName name of the column.
-     * @return An array of values or empty array.
-     */
-    getDataForColumnName(columnName: string): any[] {
-        try {
-            return this._data[columnName];
-        } catch {
-            throw new Error(`No column found with ID ${columnName}`)
-        }
-    }
-
-    /**
-     * Returns the columns with the given column (not data) type.
-     * @param columnType The type of columns, such as ColumnType.MEASURE.
-     */
-    getColumnsWithType(columnType: ColumnType): ColumnDescription[] {
-        return this._columns.filter(_ => _.columnType === columnType);
-    }
-
-    /**
-     * Returns the columns with data of the given type.
-     * @param dataType The datatype for the column.
-     */
-    getColumnsWithDataType(dataType: DataType) {
-        return this._columns.filter(_ => _.dataType === dataType);
-    }
-
-    /**
-     * Returns a list of column descriptions with the data types in the list.
-     * @param dataTypes A list of types.
-     */
-    getColumnsWithDataTypes(dataTypes: DataType[]): ColumnDescription[] {
-        const columns: ColumnDescription[] = [];
-        for (const dt of dataTypes) {
-            columns.push(...this.getColumnsWithDataType(dt));
-        }
-        return columns;
-    }
-
-    /**
-     * Returns the data for the column with the given ID.
-     * @param columnId The ID of the column.
-     */
-    getDataForColumnId(columnId: string): any[] {
-        const columnName = this.getColumnNameForId(columnId);
-        if (!columnName) {
-            throw new Error(`No column found with ID ${columnId}`);
-        }
-        return this.getDataForColumnName(columnName);
-    }
-
-    /**
-     * Returns a ChartColumn based from the ID.
-     * @param columnId The column ID for the type to be used.
-     */
-    getChartColumn(columnId: string): ChartColumn {
-        for (const c of this.chartModel.columns) {
-            if (columnId === c.id) {
-                return c;
             }
         }
-        throw new Error(`Unable to find column ${columnId}`);
+    }
+
+    /**
+     * Finds the X and Y columns based on the chart configuration.
+     * @private
+     */
+    private _setColumnAxes(): void {
+
+        if (this._chartModel?.config?.chartConfig) {
+            for (const config of this._chartModel.config.chartConfig) {
+                if (config.key === "column") {
+                    for (const d of config.dimensions) {
+                        if (d.key === 'x') {
+                            for (const col of d.columns) {
+                                this.xColumns.push(col.id);
+                            }
+                        }
+                        else if (d.key === 'y') {
+                            for (const col of d.columns) {
+                                this.yColumns.push(col.id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    getXColumnNames (): string[] {
+        return this.xColumns;
+    }
+
+    getXData (): DataColumn[] {
+        const data: DataColumn[] = [];
+        for (const cname of this.xColumns) {
+            data.push(this._data.getDataByName(cname)!);
+        }
+        return data;
+    }
+
+    /**
+     * Retrieves the names of the Y-columns associated with the current instance.
+     * @return {string[]} An array of strings representing the names of the Y-columns.
+     */
+    getYColumnNames (): string[] {
+        return this.yColumns;
+    }
+
+    getYData (): DataColumn[] {
+        const data: DataColumn[] = [];
+        for (const cname of this.yColumns) {
+            data.push(this._data.getDataByName(cname)!);
+        }
+        return data;
     }
 
 }
