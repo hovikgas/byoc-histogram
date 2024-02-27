@@ -65,6 +65,15 @@ class DataDetails {
     }
 
     /**
+     * Checks if a summary with the given id exists in the collection of summaries.
+     * @param {string} id - The id of the summary.
+     * @return {boolean} - True if a summary with the given id exists, false otherwise.
+     */
+    hasSummary(id: string): boolean {
+        return (this._summaries.find(_ => _.id === id) !== undefined);
+    }
+
+    /**
      * Finds the summary with the given name and returns it.
      * @param name The name to find.
      */
@@ -101,7 +110,7 @@ class DataDetails {
 export class TableChartModel {
     private _chartModel: ChartModel; // original chart model.
     readonly allColumns: ChartColumn[] = [];    // list of the column descriptions.
-    private _data: DataDetails;  // data in the table model.
+    readonly _data: DataDetails;  // data in the table model.
     readonly xColumns: string[] = [];
     readonly yColumns: string[] = [];
 
@@ -156,7 +165,7 @@ export class TableChartModel {
     private _populateData() {
 
         if (this._chartModel.data) {
-            this._populateSummaryColumns();
+            // this._populateSummaryColumns();
             this._populateDataColumns();
         }
 
@@ -167,6 +176,8 @@ export class TableChartModel {
      * Populates the columns that are only measures.
      * @private
      */
+
+    /* TODO Think this has to be combined with reading the data columns.
     private _populateSummaryColumns(): void {
         console.log('TableChartModel: populating summary columns =========================');
         // Summary columns are any column in the chart config that consists of a single column and value.
@@ -191,41 +202,60 @@ export class TableChartModel {
 
         console.log('TableChartModel: populating summary columns DONE =========================');
     }
+     */
 
     /**
      * Populates the data columns based on the configuration.
-     * WARNING: This assumes that the data columns are in a section that has multiple
-     * columns and that there is only one set of multi-column data.
-     * TODO: Test this assumption since KPIs may only have one value.
+     * The data can have data columns that appear multiple times.  You can get summary values for measures
+     * as well as row-level for the chart data.  The way this will be analyzed is using the following:
+     *   If the data has only one column and value, then check if it's already in a summary.  If not, add to summaries.
+     *   If the data is in the summaries, then it's data.  This occurs when there is a single value (i.e. KPIs)
+     *   Otherwise (multiple columns / values / already a summary) then this is chart data.
      * @private
      */
     private _populateDataColumns(): void {
         console.log('TableChartModel: populating data columns =========================');
+
         for (const d of this._chartModel.data!) {
             console.log('  data query data === ', d);
-            if (d.data.columns.length > 1) { // TODO need to populate for each column.
-                // The data is an array of row values, where each row aligns with columns,
-                // in the same order.
-                for (const colCnt in d.data.columns) {  // go through by column.
-                    try {
-                        const colId = d.data.columns[colCnt];
-                        const column = this.allColumns.find(c => c.id === colId)!;
-                        const colName = column.name;
 
-                        const dataValues: any[] = [];
-                        for (const rowCnt in d.data.dataValue) {
-                            dataValues.push(d.data.dataValue[rowCnt][colCnt]);
-                        }
-
-                        const dc = new DataColumn(colId, colName, dataValues);
-                        this._data.addData(dc);
-                        console.log(' adding data data ', dc);
-                    } catch (e) {
-                        console.error(`Error loading summary columns: ${e}`);
-                    }
-                }
-
+            let isSummary = true;
+            if ((d.data.columns.length > 1) ||
+                (d.data.dataValue.length > 1) ||
+                (this._data.hasSummary(d.data.columns[0]))
+            ) {
+                isSummary = false;
             }
+
+            // The data is an array of row values, where each row aligns with columns, in the same order.
+            for (const colCnt in d.data.columns) {  // go through by column.
+                try {
+                    // 1. Create the data column.
+                    const colId = d.data.columns[colCnt];
+                    const column = this.allColumns.find(c => c.id === colId)!;
+                    const colName = column.name;
+
+                    const dataValues: any[] = [];
+                    for (const rowCnt in d.data.dataValue) {
+                        dataValues.push(d.data.dataValue[rowCnt][colCnt]);
+                    }
+
+                    const dc = new DataColumn(colId, colName, dataValues);
+
+                    if (isSummary) {
+                        console.log(' adding data to summary: ', dc);
+                        this._data.addSummary(dc);
+                    }
+                    else {
+                        console.log(' adding data to data: ', dc);
+                        this._data.addData(dc);
+                    }
+
+                } catch (e) {
+                    console.error(`Error loading summary columns: ${e}`);
+                }
+            }
+
         }
         console.log('TableChartModel: populating data columns DONE =========================');
     }
