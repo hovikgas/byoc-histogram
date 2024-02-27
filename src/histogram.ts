@@ -15,14 +15,14 @@ import {
     ChartModel,
     ChartToTSEvent,
     CustomChartContext,
-    // TODO DataType,
+    DataType,
     getChartContext,
     Query, ValidationResponse, VisualPropEditorDefinition
 } from "@thoughtspot/ts-chart-sdk";
 import {TSChartConfigList} from "./TSChartConfig.ts";
 
 // Declare the numeric types for quick checking.
-// TODO const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
+const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
 
 const defaultColor = 'green'; // default chart color.
 
@@ -152,54 +152,32 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
     let isOK = true;
     let errorMessages: string[] = ["Histograms need two parameters, an attribute on the X axis and measure on the Y axis."];
 
-    /*  TODO - disabling for now so I can get all the configs.  Re-enable for this chart later.
     try {
-        // Find the column entry and not the dimension entry.
-        // let dimensions = updatedConfig.filter(_ => _.key === 'column')[0].dimensions;
-        let columnConfig = chartConfigList.getConfig('column');
+        // Find the y column and make sure it only has one value and it's numeric.
+        const yDimension = chartConfigList.getConfigDimension('y');
+        console.log(yDimension);
 
-        if (!columnConfig) {
+        if (!yDimension) {
             logMessage('invalid due to missing "column" configuration');
             isOK = false;
         } else {
 
-            const dimensions = columnConfig.dimensions;
-
-            if (dimensions.length !== 2) {
-                logMessage(`invalid due number of dimensions (${dimensions.length} !== 2)`);
+            if (yDimension.columns.length !== 1) {
+                logMessage(`invalid due number of Y columns (${yDimension.columns.length} !== 1)`);
                 isOK = false;
-            } else {  // have two columns, see if they are the right type.
+            } else {  // have at least one y column.  See if it's the right type.
 
-                // Only need to check for the first column since only expecting one.
-                const xDim = dimensions.getDimension('x');
-                console.log(xDim);
-                const yDim = dimensions.getDimension('y');
-                console.log(yDim);
-
-                if (xDim.numberColumns() != 1 || yDim.numberColumns() != 1) {
-                    logMessage('invalid due number of columns in each');
+                // Make sure the y-axis is a number
+                if (yDimension && !numericTypes.includes(yDimension.columns[0].dataType)) {
+                    logMessage('invalid due to non-numeric Y axis type');
                     isOK = false;
-                } else {
-                    // At this point we know there's one column in each.
-                    const xCol = xDim.columns[0];
-                    const yCol = yDim.columns[0]
-                    logMessage(`checking types: x: ${xCol} y: ${yCol} against ${numericTypes}`);
-
-                    // Make sure the y-axis is a number
-                    if (yCol && !numericTypes.includes(yCol.dataType)) {
-                        logMessage('invalid due to non-numeric Y axis type');
-                        isOK = false;
-                    }
                 }
             }
         }
-    } catch
-        (e) {
+    } catch (e) {
         isOK = false;
         errorMessages.push("" + e);
     }
-
-     */
 
     logMessage('validating the chart config DONE ==========================');
 
@@ -244,8 +222,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
         color = tableModel.visualProps.color;
     }
 
-    // TODO get the measure name (y-col)
-    const measure = tableModel.getYData()[0];
+    const measure = tableModel.getYData()[0];  // only want one measure for the histogram.
     logMessage(`measure: ${JSON.stringify(measure)}`);
 
     Highcharts.chart('container', {

@@ -11,7 +11,7 @@
  * The config with the dimensions (x,y), describes the chart configuration and is typically the one needed for rendering.
  */
 
-import {ChartColumn, ChartModel,} from "@thoughtspot/ts-chart-sdk";
+import {ChartColumn, ChartModel} from "@thoughtspot/ts-chart-sdk";
 
 class DataColumn {
     id: string;
@@ -115,15 +115,14 @@ export class TableChartModel {
     readonly yColumns: string[] = [];
 
     readonly visualProps: any;
-
-    // private _sortInfo: any;
-    // private visualProps: VisualProps;
+    readonly sortInfo: any;
 
     constructor(protected chartModel: ChartModel) {
         console.log("TableChartModel: chartModel === ", chartModel);
 
         this._chartModel = chartModel;
         this.visualProps = chartModel.visualProps; // This is just a JSON that varies based on config.
+        this.sortInfo = chartModel.sortInfo; // This is just a JSON that varies based on config.
 
         this._data = new DataDetails();
 

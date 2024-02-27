@@ -63,6 +63,7 @@ class TSChartConfig {
     getDimension(key: string): TSChartDimension {
         return this.dimensions.getDimension(key);
     }
+
 }
 
 /**
@@ -81,4 +82,33 @@ export class TSChartConfigList {
     getConfig(key: string): TSChartConfig {
         return this._chartConfigs[key];
     }
+
+    /**
+     * Returns the number of chart configurations in the list.
+     */
+    get length() {
+        return Object.keys(this._chartConfigs).length;
+    }
+
+    /**
+     * Returns the dimension details for the dimension with the given key.  This assumes there is only one
+     * dimension for the given key.
+     * @param key
+     * @return the dimension for the given key.
+     */
+    getConfigDimension(key: string): TSChartDimension|undefined {
+
+        // The dimension key could be in any of the configs.
+        for (const config of Object.values(this._chartConfigs)) {
+            // Each config has a dimension list (with a key that's being ignored).
+            for (const dimension of Object.values(config.dimensions.dimensions)) {
+                if (dimension.key === key) {
+                    return dimension;
+                }
+            }
+        }
+
+        return undefined;
+    }
+
 }
