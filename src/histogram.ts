@@ -22,7 +22,7 @@ import {
 import {TSChartConfigList} from "./TSChartConfig.ts";
 
 // Declare the numeric types for quick checking.
-const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
+const numericTypes = [DataType.DOUBLE, DataType.FLOAT, DataType.INT32, DataType.INT64];
 
 const defaultColor = 'green'; // default chart color.
 
@@ -150,10 +150,10 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
     console.log('chartConfigList: ', chartConfigList);
 
     let isOK = true;
-    let errorMessages: string[] = ["Histograms need two parameters, an attribute on the X axis and measure on the Y axis."];
+    let errorMessages: string[] = ["Histograms only supports a single, numeric Y axis value."];
 
     try {
-        // Find the y column and make sure it only has one value and it's numeric.
+        // Find the y column and make sure it only has one value and that it's numeric.
         const yDimension = chartConfigList.getConfigDimension('y');
         console.log(yDimension);
 
