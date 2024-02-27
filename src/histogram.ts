@@ -24,6 +24,8 @@ import {TSChartConfigList} from "./TSChartConfig.ts";
 // Declare the numeric types for quick checking.
 // TODO const numericTypes = [DataType.INT32, DataType.INT64, DataType.FLOAT];
 
+const defaultColor = 'green'; // default chart color.
+
 const logMessage = (msg: string, data: any = "") => {
     console.log(`Histogram: ${msg}`, data);
 }
@@ -93,7 +95,7 @@ const getVisualPropEditorDefinition = (): VisualPropEditorDefinition => {
             {
                 key: 'color',
                 type: 'colorpicker',
-                defaultValue: 'green',
+                defaultValue: defaultColor,
                 label: 'Color',
                 selectorType: 'COLOR'
             },
@@ -230,12 +232,17 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
         3.3, 3.2, 2.8, 3, 2.8, 3, 2.8, 3.8, 2.8, 2.8, 2.6, 3, 3.4, 3.1, 3, 3.1,
         3.1, 3.1, 2.7, 3.2, 3.3, 3, 2.5, 3, 3.4, 3];
      */
-    // TODO - update to use the new TableChartModel
 
     const chartModel = context.getChartModel()!;
     logMessage('Chart model: ', chartModel);
+
     const tableModel = new TableChartModel(chartModel);
     logMessage('tableModel: ', tableModel);
+
+    let color = defaultColor;
+    if (tableModel.visualProps) {
+        color = tableModel.visualProps.color;
+    }
 
     // TODO get the measure name (y-col)
     const measure = tableModel.getYData()[0];
@@ -271,6 +278,8 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
                 }
             }
         },
+
+        colors: [color],
 
         series: [{
             name: 'Histogram',

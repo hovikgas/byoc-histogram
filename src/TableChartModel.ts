@@ -114,6 +114,8 @@ export class TableChartModel {
     readonly xColumns: string[] = [];
     readonly yColumns: string[] = [];
 
+    readonly visualProps: any;
+
     // private _sortInfo: any;
     // private visualProps: VisualProps;
 
@@ -121,6 +123,8 @@ export class TableChartModel {
         console.log("TableChartModel: chartModel === ", chartModel);
 
         this._chartModel = chartModel;
+        this.visualProps = chartModel.visualProps; // This is just a JSON that varies based on config.
+
         this._data = new DataDetails();
 
         this._populateColumns();
@@ -171,38 +175,6 @@ export class TableChartModel {
 
         console.log('TableChartModel: data === ', this._data);
     }
-
-    /**
-     * Populates the columns that are only measures.
-     * @private
-     */
-
-    /* TODO Think this has to be combined with reading the data columns.
-    private _populateSummaryColumns(): void {
-        console.log('TableChartModel: populating summary columns =========================');
-        // Summary columns are any column in the chart config that consists of a single column and value.
-        for (const d of this._chartModel.data!) {
-            console.log('  summary query data === ', d);
-            if (d.data.columns.length === 1 && d.data.dataValue.length === 1) {
-                try {
-                    const colId = d.data.columns[0];
-                    const colName = this.allColumns.find(c => c.id === colId)!.name;
-                    const dataValue = d.data.dataValue[0];
-
-                    const dc = new DataColumn(colId, colName, dataValue);
-                    console.log(' adding summary data ', dc);
-                    this._data.addSummary(dc);
-
-                } catch (e) {
-                    console.error(`Error loading summary columns: ${e}`);
-                }
-
-            }
-        }
-
-        console.log('TableChartModel: populating summary columns DONE =========================');
-    }
-     */
 
     /**
      * Populates the data columns based on the configuration.
