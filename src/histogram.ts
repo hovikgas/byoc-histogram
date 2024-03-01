@@ -2,7 +2,7 @@
  * Creates a histogram based on a column of measures.
  * https://www.highcharts.com/docs/chart-and-series-types/histogram-series
  */
-import _, {first} from "lodash";
+import _ from "lodash";
 
 import Highcharts from "highcharts/es-modules/masters/highcharts.src";
 import "highcharts/es-modules/masters/modules/histogram-bellcurve.src";
@@ -11,8 +11,7 @@ import {TableChartModel} from "./TableChartModel.ts";
 
 import {
     ChartColumn,
-    // TODO ChartColumn,
-    ChartConfig, ChartConfigDimension, ChartConfigEditorDefinition,
+    ChartConfig, ChartConfigEditorDefinition,
     ChartModel,
     ChartToTSEvent,
     CustomChartContext,
