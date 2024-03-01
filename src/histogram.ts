@@ -60,7 +60,7 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
         columns: ChartColumn[];
      }
      */
-    let firstMeasure = chartModel.columns.find(c => c.dataType in NumericTypes)
+    let firstMeasure = chartModel.columns.find(c => NumericTypes.includes(c.dataType))
     logMessage('first measure: ', firstMeasure);
     if (firstMeasure) {
         const yDimension = {key: 'y', columns: [firstMeasure]};
