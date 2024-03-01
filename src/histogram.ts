@@ -10,6 +10,7 @@ import "highcharts/es-modules/masters/modules/histogram-bellcurve.src";
 import {TableChartModel} from "./TableChartModel.ts";
 
 import {
+    ChartColumn,
     // TODO ChartColumn,
     ChartConfig, ChartConfigDimension, ChartConfigEditorDefinition,
     ChartModel,
@@ -67,9 +68,10 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
     }
 
     // Now process the remaining columns.
-    const xDimension = {key: 'x', columns: []};
+    const xColumns: ChartColumn[] = [];
+    const xDimension = {key: 'x', columns: xColumns};
     for (const c of chartModel.columns) {
-        if (!firstMeasure || c.id !== firstMeasure.id) {
+        if (c.id !== firstMeasure?.id) {
             xDimension.columns.push(c);
         }
     }
