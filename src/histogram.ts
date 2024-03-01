@@ -28,7 +28,8 @@ const NumericTypes = [DataType.DOUBLE, DataType.FLOAT, DataType.INT32, DataType.
 const defaultColor = 'green'; // default chart color.
 
 const logMessage = (msg: string, data: any = "") => {
-    console.log(`Histogram: ${msg}`, data);
+    console.log(`Histogram: ${msg}`);
+    console.log(data ? data : "  no data");
 }
 
 /**
@@ -91,7 +92,7 @@ const getChartConfigEditorDefinition = (): ChartConfigEditorDefinition[] => {
         {
             key: 'column',
             label: 'Custom Column',
-            descriptionText: 'must provide one attribute and one measure',
+            descriptionText: 'must provide at least one measure',
             columnSections: [
                 {
                     key: 'x',
