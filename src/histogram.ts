@@ -28,8 +28,7 @@ const NumericTypes = [DataType.DOUBLE, DataType.FLOAT, DataType.INT32, DataType.
 const defaultColor = 'green'; // default chart color.
 
 const logMessage = (msg: string, data: any = "") => {
-    console.log(`Histogram: ${msg}`);
-    console.log(data ? data : "  no data");
+    console.log(`Histogram: ${msg}`, data);
 }
 
 /**
@@ -254,6 +253,11 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
     const measure = tableModel.getYData()[0];  // only want one measure for the histogram.
     logMessage(`measure: ${JSON.stringify(measure)}`);
+
+    // Make sure a measure was found.
+    if (!measure) {
+        throw new Error(`no measure found in JSON.string ${measure}`);
+    }
 
     Highcharts.chart('container', {
         title: {
