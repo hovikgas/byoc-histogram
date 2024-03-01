@@ -11,7 +11,9 @@
  * The config with the dimensions (x,y), describes the chart configuration and is typically the one needed for rendering.
  */
 
-import {ChartColumn, ChartModel} from "@thoughtspot/ts-chart-sdk";
+import {ChartColumn, ChartConfigDimension, ChartModel} from "@thoughtspot/ts-chart-sdk";
+
+import {searchObjects} from "./util.ts";
 
 class DataColumn {
     id: string;
@@ -216,8 +218,7 @@ export class TableChartModel {
                     if (isSummary) {
                         console.log(' adding data to summary: ', dc);
                         this._data.addSummary(dc);
-                    }
-                    else {
+                    } else {
                         console.log(' adding data to data: ', dc);
                         this._data.addData(dc);
                     }
@@ -237,23 +238,27 @@ export class TableChartModel {
      */
     private _setColumnAxes(): void {
 
-        if (this._chartModel?.config?.chartConfig) {
-            for (const config of this._chartModel.config.chartConfig) {
-                if (config.key === "column") {
-                    for (const d of config.dimensions) {
-                        if (d.key === 'x') {
-                            for (const col of d.columns) {
-                                this.xColumns.push(col.id);
-                            }
-                        } else if (d.key === 'y') {
-                            for (const col of d.columns) {
-                                this.yColumns.push(col.id);
-                            }
-                        }
-                    }
-                }
+        const xColumns: ChartConfigDimension[] =
+            searchObjects(this._chartModel, 'key', 'x') as ChartConfigDimension[];
+        console.log('x axis columns', xColumns);
+
+        for (const x of xColumns) {
+            for (const c of x.columns) {
+                this.xColumns.push(c.id);
             }
         }
+
+        const yColumns: ChartConfigDimension[] =
+            searchObjects(this._chartModel, 'key', 'y') as ChartConfigDimension[];
+        console.log('y axis columns', yColumns);
+
+        for (const y of yColumns) {
+            for (const c of y.columns) {
+                this.yColumns.push(c.id);
+            }
+        }
+
+
     }
 
     getXColumnNames(): string[] {

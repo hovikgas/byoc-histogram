@@ -256,7 +256,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
     // Make sure a measure was found.
     if (!measure) {
-        throw new Error(`no measure found in JSON.string ${measure}`);
+        throw new Error(`no measure found in ${JSON.stringify(measure)}`);
     }
 
     Highcharts.chart('container', {
