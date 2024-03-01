@@ -61,8 +61,11 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
      }
      */
     let firstMeasure = chartModel.columns.find(c => c.dataType in NumericTypes)
+    logMessage('first measure: ', firstMeasure);
     if (firstMeasure) {
         const yDimension = {key: 'y', columns: [firstMeasure]};
+
+        logMessage('    adding: ', yDimension);
         defaultChartConfig.dimensions.push(yDimension);
     }
 
@@ -71,9 +74,11 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
     const xDimension = {key: 'x', columns: xColumns};
     for (const c of chartModel.columns) {
         if (c.id !== firstMeasure?.id) {
+            logMessage('    adding to xDimension: ', c);
             xDimension.columns.push(c);
         }
     }
+    logMessage('    adding: ', xDimension);
     defaultChartConfig.dimensions.push(xDimension);
 
     logMessage("getting default chart config (DONE) ===================================", defaultChartConfig);
