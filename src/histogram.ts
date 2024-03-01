@@ -37,7 +37,7 @@ const logMessage = (msg: string, data: any = "") => {
  * @return An array of chart configs (https://ts-chart-sdk-docs.vercel.app/interfaces/ChartConfig.html)
  */
 const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
-    logMessage("getting default chart config");
+    logMessage("getting default chart config ===================================", chartModel);
 
     const tableModel = new TableChartModel(chartModel);
 
@@ -58,6 +58,8 @@ const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
             }
         ]
     }
+
+    logMessage("getting default chart config (DONE) ===================================");
 
     return [defaultChartConfig];
 }
