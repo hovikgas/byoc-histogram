@@ -2,7 +2,7 @@
  * Creates a histogram based on a column of measures.
  * https://www.highcharts.com/docs/chart-and-series-types/histogram-series
  */
-import _ from "lodash";
+import _, {first} from "lodash";
 
 import Highcharts from "highcharts/es-modules/masters/highcharts.src";
 import "highcharts/es-modules/masters/modules/histogram-bellcurve.src";
@@ -11,7 +11,7 @@ import {TableChartModel} from "./TableChartModel.ts";
 
 import {
     // TODO ChartColumn,
-    ChartConfig, ChartConfigEditorDefinition,
+    ChartConfig, ChartConfigDimension, ChartConfigEditorDefinition,
     ChartModel,
     ChartToTSEvent,
     CustomChartContext,
@@ -23,7 +23,7 @@ import {TSChartConfigList} from "./TSChartConfig.ts";
 
 // Declare the numeric types for quick checking.
 // TODO move to a chart util class.  Maybe move all the classes to a ChartHelpers package.
-const numericTypes = [DataType.DOUBLE, DataType.FLOAT, DataType.INT32, DataType.INT64];
+const NumericTypes = [DataType.DOUBLE, DataType.FLOAT, DataType.INT32, DataType.INT64];
 
 const defaultColor = 'green'; // default chart color.
 
@@ -33,33 +33,49 @@ const logMessage = (msg: string, data: any = "") => {
 
 /**
  * Returns the default chart config for the histogram chart type.
+ * If there are numeric measures, the first one will be put on the Y column.  If there are attributes (non-numeric),
+ * they will all be put on the X-axis in the order received.
  * @param chartModel A chart model (https://ts-chart-sdk-docs.vercel.app/interfaces/ChartModel.html)
  * @return An array of chart configs (https://ts-chart-sdk-docs.vercel.app/interfaces/ChartConfig.html)
  */
 const getDefaultChartConfig = (chartModel: ChartModel): ChartConfig[] => {
     logMessage("getting default chart config ===================================", chartModel);
 
-    const tableModel = new TableChartModel(chartModel);
+    /*
+     export interface ChartConfig {
+         key: string;
+         dimensions: ChartConfigDimension[];
+     }
+     */
+    const defaultChartConfig: ChartConfig = {key: 'default', dimensions: []};
 
-    // Make sure there is at least one Y column, and it is a number.
-    if (tableModel.allColumns.length < 1) {
-        return [];
+    // Make sure there is at least one column.
+    if (chartModel.columns.length < 1) {
+        return [defaultChartConfig];
     }
 
-    const column_key = 'measure';
-
-    // For a histogram, there aren't any dimensions to worry about.
-    const defaultChartConfig: ChartConfig = {
-        key: 'default', // this is returning a default configuration.
-        dimensions: [
-            {
-                key: column_key,
-                columns: [] // tableModel.getYColumnNames()[0] // TODO - Not sure this is correct.
-            }
-        ]
+    /*
+      export interface ChartConfigDimension {
+        key: string;
+        columns: ChartColumn[];
+     }
+     */
+    let firstMeasure = chartModel.columns.find(c => c.dataType in NumericTypes)
+    if (firstMeasure) {
+        const yDimension = {key: 'y', columns: [firstMeasure]};
+        defaultChartConfig.dimensions.push(yDimension);
     }
 
-    logMessage("getting default chart config (DONE) ===================================");
+    // Now process the remaining columns.
+    const xDimension = {key: 'x', columns: []};
+    for (const c of chartModel.columns) {
+        if (!firstMeasure || c.id !== firstMeasure.id) {
+            xDimension.columns.push(c);
+        }
+    }
+    defaultChartConfig.dimensions.push(xDimension);
+
+    logMessage("getting default chart config (DONE) ===================================", defaultChartConfig);
 
     return [defaultChartConfig];
 }
@@ -175,7 +191,7 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
             } else {  // have at least one y column.  See if it's the right type.
 
                 // Make sure the y-axis is a number
-                if (yDimension && !numericTypes.includes(yDimension.columns[0].dataType)) {
+                if (yDimension && !NumericTypes.includes(yDimension.columns[0].dataType)) {
                     logMessage('invalid due to non-numeric Y axis type');
                     isOK = false;
                 }
