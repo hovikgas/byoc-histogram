@@ -22,6 +22,7 @@ import {
 import {TSChartConfigList} from "./TSChartConfig.ts";
 
 // Declare the numeric types for quick checking.
+// TODO move to a chart util class.  Maybe move all the classes to a ChartHelpers package.
 const numericTypes = [DataType.DOUBLE, DataType.FLOAT, DataType.INT32, DataType.INT64];
 
 const defaultColor = 'green'; // default chart color.
@@ -105,15 +106,18 @@ const getVisualPropEditorDefinition = (): VisualPropEditorDefinition => {
 
 /**
  * This function would appear to get the queries based on the user configuration in the chart.
- * NOTE: In the sample, this isn't actually called.
  * @param chartConfig
  */
 const getQueriesFromChartConfig = (
     chartConfig: ChartConfig[]
 ): Array<Query> => {
-    logMessage('chart config: ', chartConfig);
+    logMessage('getQueriesFromChartConfig ===============================================================');
+    logMessage('get queries from chart config: ', chartConfig);
+
+    let queries: Query[] = [];
+
     // map all the columns in the config to the query array
-    let queries = chartConfig.map(
+    queries = chartConfig.map(
         (config: ChartConfig): Query =>
             _.reduce(
                 config.dimensions,
@@ -130,6 +134,7 @@ const getQueriesFromChartConfig = (
     );
 
     logMessage('queries: ', queries);
+    logMessage('getQueriesFromChartConfig (DONE) ========================================================');
 
     return queries;
 }
@@ -150,7 +155,7 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
     console.log('chartConfigList: ', chartConfigList);
 
     let isOK = true;
-    let errorMessages: string[] = ["Histograms only supports a single, numeric Y axis value."];
+    let errorMessages: string[] = ["Histograms require a single, numeric Y axis value."];
 
     try {
         // Find the y column and make sure it only has one value and that it's numeric.
