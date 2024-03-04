@@ -255,7 +255,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
     let color = defaultColor;
     logMessage('tableModel.visualProps ', tableModel.visualProps);
-    if (tableModel.visualProps) {
+    if (tableModel.visualProps && tableModel.visualProps.color) {
         color = tableModel.visualProps.color;
     }
     logMessage('color', color);
