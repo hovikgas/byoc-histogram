@@ -234,6 +234,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
     // Original code from https://jsfiddle.net/api/post/library/pure/
 
+    /*
     const data = [3.5, 3, 3.2, 3.1, 3.6, 3.9, 3.4, 3.4, 2.9, 3.1, 3.7, 3.4, 3, 3,
         4, 4.4, 3.9, 3.5, 3.8, 3.8, 3.4, 3.7, 3.6, 3.3, 3.4, 3, 3.4, 3.5, 3.4,
         3.2, 3.1, 3.4, 4.1, 4.2, 3.1, 3.2, 3.5, 3.6, 3, 3.4, 3.5, 2.3, 3.2, 3.5,
@@ -244,6 +245,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
         2.5, 3.6, 3.2, 2.7, 3, 2.5, 2.8, 3.2, 3, 3.8, 2.6, 2.2, 3.2, 2.8, 2.8, 2.7,
         3.3, 3.2, 2.8, 3, 2.8, 3, 2.8, 3.8, 2.8, 2.8, 2.6, 3, 3.4, 3.1, 3, 3.1,
         3.1, 3.1, 2.7, 3.2, 3.3, 3, 2.5, 3, 3.4, 3];
+     */
 
     const chartModel = context.getChartModel()!;
     logMessage('Chart model: ', chartModel);
@@ -265,6 +267,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
     }
 
     logMessage('values:  ', measure.values);
+    logMessage('color', color);
 
     Highcharts.chart('container', {
         title: {
@@ -310,8 +313,7 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
         }, {
             name: 'Data',
             type: 'scatter',
-            //data: measure.values,
-            data: data,
+            data: measure.values,
             id: 's1',
             marker: {
                 radius: 1.5
