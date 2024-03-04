@@ -216,9 +216,16 @@ const getValidateConfig = (updatedConfig: ChartConfig[], chartModel: ChartModel)
 }
 
 /**
- * This function does the actual rendering of the chart.  It needs to be called in the context of emitters.
- * See renderChart.
+ * Function: _renderChart
+ *
+ * Description: This function is responsible for rendering a chart using the provided CustomChartContext.
+ *
+ * Parameters:
+ * - context: The CustomChartContext object that contains the necessary data and methods for rendering the chart.
+ *
+ * Returns: A Promise that resolves to void.
  */
+
 const _renderChart = async (context: CustomChartContext): Promise<void> => {
 
 
@@ -258,6 +265,8 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
     if (!measure) {
         throw new Error(`no measure found in ${JSON.stringify(measure)}`);
     }
+
+    logMessage('values:  ', measure.values);
 
     Highcharts.chart('container', {
         title: {
