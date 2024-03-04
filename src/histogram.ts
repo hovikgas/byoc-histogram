@@ -254,9 +254,11 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
     logMessage('tableModel: ', tableModel);
 
     let color = defaultColor;
+    logMessage('tableModel.visualProps ', tableModel.visualProps);
     if (tableModel.visualProps) {
         color = tableModel.visualProps.color;
     }
+    logMessage('color', color);
 
     const measure = tableModel.getYData()[0];  // only want one measure for the histogram.
     logMessage(`measure: ${JSON.stringify(measure)}`);
@@ -267,7 +269,6 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
     }
 
     logMessage('values:  ', measure.values);
-    logMessage('color', color);
 
     Highcharts.chart('container', {
         title: {
