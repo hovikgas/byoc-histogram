@@ -271,10 +271,6 @@ const _renderChart = async (context: CustomChartContext): Promise<void> => {
     logMessage('values:  ', measure.values);
 
     Highcharts.chart('container', {
-        title: {
-            text: 'Highcharts Histogram In ThoughtSpot'
-        },
-
         xAxis: [{
             title: {text: measure.name},
             alignTicks: false
